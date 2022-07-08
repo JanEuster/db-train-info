@@ -31,6 +31,18 @@ export default Vue.extend({
       trainFieldActive,
     };
   },
+  head() {
+    return {
+      title: "db-train-info",
+      meta: [
+        {
+          hid: 'description',
+          name: 'description',
+          content: 'My custom description'
+        },
+      ]
+    }
+  },
   methods: {
     setStation(e: Station) {
       stationResult.value = e;
@@ -70,6 +82,11 @@ export default Vue.extend({
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+}
+
+
+.tight {
+  letter-spacing: -4px;
 }
 
 .query-wrapper {

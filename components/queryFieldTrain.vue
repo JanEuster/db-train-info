@@ -4,6 +4,7 @@ import Fuse from "fuse.js";
 import { ref, reactive, defineComponent } from "vue";
 import { format } from 'date-fns'
 import { Train } from "./types";
+import JourneyDetails from "./journeyDetails/index.vue";
 
 
 let data = reactive({
@@ -14,8 +15,8 @@ let data = reactive({
 });
 let inputRef = ref("")
 
-const getSpecific = (url: string, name: string) => {
-  return fetch(url, {
+const getSpecific = async (url: string, name: string) => {
+  return await fetch(url, {
     method: 'GET',
     headers: <HeadersInit>{
       'Content-Type': 'application/json',
@@ -24,7 +25,7 @@ const getSpecific = (url: string, name: string) => {
     }
   })
     .then(res => res.json())
-    .then(items => {
+    .then((items: Array<Train>) => {
       const fuse = new Fuse(items, { keys: ['name', 'type', 'direction'], distance: 5 });
       const results = fuse.search(name);
       return results[0].item;
@@ -37,7 +38,7 @@ export default defineComponent({
       data,
       showRecommendations: false,
       endpoint: "fahrplan/v1/departureBoard/{id}?date",
-    }
+    };
   },
   props: {
     isActive: { type: Boolean, required: true },
@@ -45,7 +46,7 @@ export default defineComponent({
   },
   computed: {
     time() {
-      console.log(data.selected)
+      console.log(data.selected);
       return data.selected ? format(new Date(data.selected.dateTime), "HH:mm") : null;
     },
     direction() {
@@ -53,52 +54,73 @@ export default defineComponent({
     },
   },
   methods: {
-    getDetails(id: string) {
-
+    async getDetails(id: string) {
+      return await fetch("https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id, {
+        method: "GET",
+        headers: <HeadersInit>{
+          "Content-Type": "application/json",
+          "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+          "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+        }
+      })
+        .then(res => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            console.error(res.status + " " + res.statusText);
+          }
+        })
     },
     setSelected(value: Train | false) {
       if (value) {
-        value.details = this.getDetails(value.detailsId);
+        this.getDetails(value.detailsId).then(d => {
+          console.log(d)
+          value.details = d
+
+          data.selected = value;
+          this.$emit("train-result", value);
+        });
         (this.$refs.inputRef as HTMLInputElement).value = value.name;
+
+      } else {
+        data.selected = false;
+        this.$emit("train-result", false);
       }
-      data.selected = value;
-      this.$emit("train-result", value);
     },
     getRecommendations(e: Event) {
       const value = (e.target as HTMLInputElement)?.value;
       data.selected = false;
-
       if (value.length > 0) {
-
         fetch(this.fetchURL, {
-          method: 'GET',
+          method: "GET",
           headers: <HeadersInit>{
-            'Content-Type': 'application/json',
-            'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
-            'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
+            "Content-Type": "application/json",
+            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
           }
         })
           .then(res => {
             if (res.ok) {
               return res.json();
-            } else {
+            }
+            else {
               console.error(res.status + " " + res.statusText);
             }
           })
           .then((d) => {
             const trainResults: Array<any> = d;
-            const fuse = new Fuse(trainResults, { keys: ['name', 'type', 'direction'], distance: 5 });
+            const fuse = new Fuse(trainResults, { keys: ["name", "type", "direction"], distance: 5 });
             const results = fuse.search(value);
             data.recommendations = results.map(r => r.item).slice(0, 10);
             console.log(results);
-
             if (value.toLowerCase() === data.recommendations[0].name.toLowerCase()) {
               this.setSelected(data.recommendations[0]);
               (this.$refs.inputRef as HTMLInputElement).value = data.recommendations[0].name;
             }
           })
-          .catch(err => console.warn(err))
-      } else {
+          .catch(err => console.warn(err));
+      }
+      else {
         data.recommendations = [];
       }
     },
@@ -106,7 +128,6 @@ export default defineComponent({
       const value = (e.target as HTMLLIElement).title;
       (this.$refs.inputRef as HTMLInputElement).value = String(value);
       getSpecific(this.fetchURL, value).then(selection => {
-        console.log("selection", selection)
         this.setSelected(selection);
       });
     },
@@ -114,38 +135,41 @@ export default defineComponent({
       setTimeout(() => this.showRecommendations = view, 200);
     },
     isCorrect(selected: any): string | null {
-      console.log("selected", selected)
-      return selected ? 'correct' : null
+      console.log("selected", selected);
+      return selected ? "correct" : null;
     },
-
     showDate(datetime: string) {
-      return format(new Date(datetime), "HH:mm")
+      return format(new Date(datetime), "HH:mm");
     }
-  }
+  },
+  components: { JourneyDetails }
 });
 
 </script>
 
 <template>
-  <div class="query-field">
-    <label>Train:</label>
-    <div class="query-field-input-big">
-      <input :disabled="!isActive" type="text" :class="isCorrect(data.selected)" @input="getRecommendations($event)"
-        v-on:focus="setShowRecommendations(true)" v-on:blur="setShowRecommendations(false)" ref="inputRef" />
-      <span>
-        <sup ref="datetime" v-if="data.selected">{{ time }}</sup>
-        <sub ref="direction" v-if="data.selected"><span>--></span> {{ direction }}</sub>
-        <label>{{ endpoint }}</label>
-      </span>
-      <ul>
-        <li v-if="showRecommendations" v-for="rec in data.recommendations" v-bind:key="rec.detailsId">
-          <h4>{{ rec.name }}</h4>
-          <sup>{{ showDate(rec.dateTime) }}</sup>
-          <sub><span>--></span> {{ rec.direction }}</sub>
-          <div @click.stop="select($event)" :title="rec.name"></div>
-        </li>
-      </ul>
+  <div>
+    <div class="query-field">
+      <label>Train:</label>
+      <div class="query-field-input-big">
+        <input :disabled="!isActive" type="text" :class="isCorrect(data.selected)" @input="getRecommendations($event)"
+          v-on:focus="setShowRecommendations(true)" v-on:blur="setShowRecommendations(false)" ref="inputRef" />
+        <span>
+          <sup ref="datetime" v-if="data.selected">{{ time }}</sup>
+          <sub ref="direction" v-if="data.selected"><span class="tight">--></span> {{ direction }}</sub>
+          <label>{{ endpoint }}</label>
+        </span>
+        <ul>
+          <li v-if="showRecommendations" v-for="rec in data.recommendations" v-bind:key="rec.detailsId">
+            <h4>{{ rec.name }}</h4>
+            <sup>{{ showDate(rec.dateTime) }}</sup>
+            <sub><span class="tight">--></span> {{ rec.direction }}</sub>
+            <div @click.stop="select($event)" :title="rec.name"></div>
+          </li>
+        </ul>
+      </div>
     </div>
+    <JourneyDetails v-if="data.selected" :train="data.selected" />
   </div>
 </template>
 
@@ -194,7 +218,6 @@ export default defineComponent({
     font-weight: bolder;
 
     span {
-      letter-spacing: -4px;
       font-weight: bolder;
       font-size: 15px;
     }
