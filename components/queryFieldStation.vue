@@ -116,6 +116,8 @@ export default defineComponent({
 .query-field {
   display: inline-block;
   padding: 12px;
+  padding-top: 8px;
+  padding-bottom: 16px;
   border: 3px solid black;
 }
 

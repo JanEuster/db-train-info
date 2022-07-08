@@ -151,16 +151,6 @@ export default defineComponent({
 
 
 <style lang="scss">
-.query-field {
-  display: inline-block;
-  padding: 12px;
-  border: 3px solid black;
-}
-
-.correct {
-  background: greenyellow;
-}
-
 .query-field-input-big {
   position: relative;
 
