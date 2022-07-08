@@ -1,14 +1,9 @@
 
 <script lang="ts">
 import { ref, reactive, defineComponent } from "vue";
+import { Station } from "./types";
 
 
-type Station = {
-  name: string;
-  lon: number;
-  lat: number;
-  id: number;
-}
 
 let data = reactive({
   inputRef: "",

@@ -3,22 +3,8 @@
 import Fuse from "fuse.js";
 import { ref, reactive, defineComponent } from "vue";
 import { format } from 'date-fns'
+import { Train } from "./types";
 
-type TrainDetails = {
-
-}
-type Train = {
-  boardId: number,
-  dateTime: string,
-  detailsId: string,
-  direction: string,
-  name: string,
-  stopId: number,
-  stopName: string,
-  track: string,
-  type: string,
-  details?: any,
-}
 
 let data = reactive({
   inputRef: "",
