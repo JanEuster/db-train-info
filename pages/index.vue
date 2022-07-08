@@ -55,16 +55,30 @@ export default Vue.extend({
 
 
 <template>
-  <div>
+  <div class="query-wrapper">
     <QueryFieldStation @station-result="setStation($event)" />
     <QueryFieldTrain :isActive="trainFieldActive" :fetchURL="generateTrainURL()" @train-result="setTrain($event)" />
   </div>
 </template>
 
 <style lang="scss">
+:root {
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif
+}
+
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+}
+
+.query-wrapper {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 20px;
+
+  &>* {
+    margin-left: 10px;
+  }
 }
 </style>

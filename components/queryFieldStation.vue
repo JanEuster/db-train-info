@@ -82,8 +82,9 @@ export default defineComponent({
       }
     },
     select(e: Event) {
-      const value = (e.target as HTMLLIElement)?.innerText;
-      (this.$refs.inputRef as HTMLInputElement).value = value;
+      const value = (e.target as HTMLLIElement).title;
+      console.log(e);
+      (this.$refs.inputRef as HTMLInputElement).value = String(value);
       getSpecific(this.fetchURL + value).then(selection => {
         this.setSelected(selection);
       });
@@ -108,7 +109,7 @@ export default defineComponent({
       <label>{{ endpoint }}</label>
       <ul>
         <li v-if="showRecommendations" v-for="rec in data.recommendations" v-bind:key="rec.id" @click="select($event)"
-          value="abc">
+          :title="rec.name">
           {{ rec.name }}
         </li>
       </ul>
@@ -181,6 +182,7 @@ export default defineComponent({
       cursor: pointer;
       user-select: none;
       padding: 0 3px;
+      height: 28px;
 
       &:hover {
         outline: 3px solid black;

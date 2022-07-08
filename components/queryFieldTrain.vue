@@ -2,8 +2,7 @@
 <script lang="ts">
 import Fuse from "fuse.js";
 import { ref, reactive, defineComponent } from "vue";
-import { useVueFuse } from "vue-fuse"
-
+import { format } from 'date-fns'
 
 type TrainDetails = {
 
@@ -18,7 +17,7 @@ type Train = {
   stopName: string,
   track: string,
   type: string,
-  details: any,
+  details?: any,
 }
 
 let data = reactive({
@@ -29,7 +28,7 @@ let data = reactive({
 });
 let inputRef = ref("")
 
-const getSpecific = (url: string) => {
+const getSpecific = (url: string, name: string) => {
   return fetch(url, {
     method: 'GET',
     headers: <HeadersInit>{
@@ -39,7 +38,11 @@ const getSpecific = (url: string) => {
     }
   })
     .then(res => res.json())
-    .then(items => { return items[0] });
+    .then(items => {
+      const fuse = new Fuse(items, { keys: ['name', 'type', 'direction'], distance: 5 });
+      const results = fuse.search(name);
+      return results[0].item;
+    });
 }
 
 export default defineComponent({
@@ -54,10 +57,23 @@ export default defineComponent({
     isActive: { type: Boolean, required: true },
     fetchURL: { type: String, required: true },
   },
+  computed: {
+    time() {
+      console.log(data.selected)
+      return data.selected ? format(new Date(data.selected.dateTime), "HH:mm") : null;
+    },
+    direction() {
+      return data.selected ? data.selected.direction : null;
+    },
+  },
   methods: {
+    getDetails(id: string) {
+
+    },
     setSelected(value: Train | false) {
       if (value) {
         value.details = this.getDetails(value.detailsId);
+        (this.$refs.inputRef as HTMLInputElement).value = value.name;
       }
       data.selected = value;
       this.$emit("train-result", value);
@@ -101,9 +117,10 @@ export default defineComponent({
       }
     },
     select(e: Event) {
-      const value = (e.target as HTMLLIElement)?.innerText;
-      (this.$refs.inputRef as HTMLInputElement).value = value;
-      getSpecific(this.fetchURL + value).then(selection => {
+      const value = (e.target as HTMLLIElement).title;
+      (this.$refs.inputRef as HTMLInputElement).value = String(value);
+      getSpecific(this.fetchURL, value).then(selection => {
+        console.log("selection", selection)
         this.setSelected(selection);
       });
     },
@@ -111,7 +128,12 @@ export default defineComponent({
       setTimeout(() => this.showRecommendations = view, 200);
     },
     isCorrect(selected: any): string | null {
+      console.log("selected", selected)
       return selected ? 'correct' : null
+    },
+
+    showDate(datetime: string) {
+      return format(new Date(datetime), "HH:mm")
     }
   }
 });
@@ -121,14 +143,20 @@ export default defineComponent({
 <template>
   <div class="query-field">
     <label>Train:</label>
-    <div class="query-field-input">
+    <div class="query-field-input-big">
       <input :disabled="!isActive" type="text" :class="isCorrect(data.selected)" @input="getRecommendations($event)"
         v-on:focus="setShowRecommendations(true)" v-on:blur="setShowRecommendations(false)" ref="inputRef" />
-      <label>{{ endpoint }}</label>
+      <span>
+        <sup ref="datetime" v-if="data.selected">{{ time }}</sup>
+        <sub ref="direction" v-if="data.selected"><span>--></span> {{ direction }}</sub>
+        <label>{{ endpoint }}</label>
+      </span>
       <ul>
-        <li v-if="showRecommendations" v-for="rec in data.recommendations" v-bind:key="rec.id" @click="select($event)"
-          value="abc">
-          {{ rec.name }}
+        <li v-if="showRecommendations" v-for="rec in data.recommendations" v-bind:key="rec.detailsId">
+          <h4>{{ rec.name }}</h4>
+          <sup>{{ showDate(rec.dateTime) }}</sup>
+          <sub><span>--></span> {{ rec.direction }}</sub>
+          <div @click.stop="select($event)" :title="rec.name"></div>
         </li>
       </ul>
     </div>
@@ -147,15 +175,15 @@ export default defineComponent({
   background: greenyellow;
 }
 
-.query-field-input {
+.query-field-input-big {
   position: relative;
 
   input {
     border: 2px solid black;
-    padding: 2px 4px;
-    padding-bottom: 14px;
-    width: 240px;
-    height: 45px;
+    padding: 0px 4px;
+    padding-bottom: 30px;
+    width: 190px;
+    height: 60px;
   }
 
   input:hover {
@@ -174,6 +202,38 @@ export default defineComponent({
     bottom: 4px;
     z-index: 9999;
   }
+
+  sup {
+    position: absolute;
+    top: 10px;
+    right: 5px;
+    font-size: 14px;
+  }
+
+  sub {
+    position: absolute;
+    bottom: 11px;
+    left: 3px;
+    font-style: italic;
+    font-weight: bolder;
+
+    span {
+      letter-spacing: -4px;
+      font-weight: bolder;
+      font-size: 15px;
+    }
+  }
+
+  span>sup {
+    top: 16px;
+    right: 7px;
+  }
+
+  span>sub {
+    bottom: 27px;
+    left: 6px;
+  }
+
 
   ul {
     position: absolute;
@@ -201,9 +261,24 @@ export default defineComponent({
       cursor: pointer;
       user-select: none;
       padding: 0 3px;
+      height: 40px;
+
+      position: relative;
 
       &:hover {
         outline: 3px solid black;
+      }
+
+
+
+
+      div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
       }
     }
   }
