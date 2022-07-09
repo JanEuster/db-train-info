@@ -1,17 +1,13 @@
 <script lang="ts">
-import Fuse from 'fuse.js'
-import { ref, reactive, defineComponent } from 'vue'
-import { format } from 'date-fns'
-import { Train } from './types'
-import JourneyDetails from './journeyDetails/index.vue'
+import Fuse from 'fuse.js';
+import { ref, reactive, defineComponent } from 'vue';
+import { format } from 'date-fns';
+import { Train, TrainWithDetails } from './types';
+import JourneyDetails from './journeyDetails/journeyDetails.vue';
 
-let data = reactive({
-  inputRef: '',
-  recommendations: [] as Train[],
-  // showRecommendations: true,
-  selected: false as Train | false,
-})
-let inputRef = ref('')
+let inputRef = ref('');
+let recommendations = ref<Train[]>([]);
+
 
 const getSpecific = async (url: string, name: string) => {
   return await fetch(url, {
@@ -27,41 +23,30 @@ const getSpecific = async (url: string, name: string) => {
       const fuse = new Fuse(items, {
         keys: ['name', 'type', 'direction'],
         distance: 5,
-      })
-      const results = fuse.search(name)
-      console.log('results', results)
-      return results[0].item
-    })
-}
+      });
+      const results = fuse.search(name);
+      return results[0].item;
+    });
+};
 
 export default defineComponent({
-  data() {
-    return {
-      data,
-      showRecommendations: false,
-      endpoint: 'fahrplan/v1/departureBoard/{id}?date',
-    }
-  },
   props: {
     isActive: { type: Boolean, required: true },
     fetchURL: { type: String, required: true },
+    selected: { type: Object},
   },
-  computed: {
-    time() {
-      console.log(data.selected)
-      return data.selected
-        ? format(new Date(data.selected.dateTime), 'HH:mm')
-        : null
-    },
-    direction() {
-      return data.selected ? data.selected.direction : null
-    },
+  emits: ['train-result'],
+  data() {
+    return {
+      recommendations,
+      showRecommendations: false,
+      endpoint: 'fahrplan/v1/departureBoard/{id}?date',
+    };
   },
   methods: {
     async getDetails(id: string) {
       return await fetch(
-        'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/' +
-          id,
+        'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/' + id,
         {
           method: 'GET',
           headers: {
@@ -72,31 +57,27 @@ export default defineComponent({
         }
       ).then((res) => {
         if (res.ok) {
-          return res.json()
+          return res.json();
         } else {
-          console.error(res.status + ' ' + res.statusText)
+          console.error(res.status + ' ' + res.statusText);
         }
-      })
+      });
     },
-    setSelected(value: Train | false) {
-      console.log('setSelected', value)
+    setSelected(value: Train | undefined) {
       if (value) {
         this.getDetails(value.detailsId).then((d) => {
-          console.log(d)
-          value.details = d
+          value.details = d;
 
-          data.selected = value
-          this.$emit('train-result', value)
-        })
-        ;(this.$refs.inputRef as HTMLInputElement).value = value.name
+          this.$emit('train-result', value);
+        });
+        (this.$refs.inputRef as HTMLInputElement).value = value.name;
       } else {
-        data.selected = false
-        this.$emit('train-result', false)
+        this.$emit('train-result', undefined);
       }
     },
-    getRecommendations(e: Event) {
-      const value = (e.target as HTMLInputElement)?.value
-      data.selected = false
+    getRecommendations() {
+      const value = (this.$refs.inputRef as HTMLInputElement)?.value;
+      this.$emit('train-result', undefined);
       if (value.length > 0) {
         fetch(this.fetchURL, {
           method: 'GET',
@@ -108,62 +89,54 @@ export default defineComponent({
         })
           .then((res) => {
             if (res.ok) {
-              return res.json()
+              return res.json();
             } else {
-              console.error(res.status + ' ' + res.statusText)
+              console.error(res.status + ' ' + res.statusText);
             }
           })
           .then((d) => {
-            const trainResults: Array<any> = d
+            const trainResults: Array<any> = d;
             const fuse = new Fuse(trainResults, {
               keys: ['name', 'type', 'direction'],
-              distance: 5,
-            })
-            const results = fuse.search(value)
-            data.recommendations = results.map((r) => r.item).slice(0, 10)
-            console.log(results)
-            if (
-              value.toLowerCase() === data.recommendations[0].name.toLowerCase()
-            ) {
-              this.setSelected(data.recommendations[0])
-              ;(this.$refs.inputRef as HTMLInputElement).value =
-                data.recommendations[0].name
+              distance: 7,
+            });
+            const results = fuse.search(value);
+            recommendations.value = results.map((r) => r.item).slice(0, 10);
+            if (value.toLowerCase() === recommendations.value[0].name.toLowerCase()) {
+              this.setSelected(recommendations.value[0]);
+              (this.$refs.inputRef as HTMLInputElement).value = recommendations.value[0].name;
+            } else {
+              this.setSelected(undefined);
             }
           })
-          .catch((err) => console.warn(err))
+          .catch((err) => console.warn(err));
       } else {
-        data.recommendations = []
+        recommendations.value = [];
+        this.setSelected(undefined);
       }
     },
     select(e: Event) {
-      const value = (e.target as HTMLLIElement).title
-      ;(this.$refs.inputRef as HTMLInputElement).value = String(value)
+      const value = (e.target as HTMLLIElement).title;
+      (this.$refs.inputRef as HTMLInputElement).value = String(value);
       getSpecific(this.fetchURL, value).then((selection) => {
-        this.setSelected(selection)
-      })
+        this.setSelected(selection);
+      });
     },
     setShowRecommendations(view: boolean) {
       setTimeout(() => {
-        this.showRecommendations = view
-      }, 200)
+        this.showRecommendations = view;
+      }, 200);
     },
-    isCorrect(selected: any): string | null {
-      console.log('selected', selected)
-      return selected ? 'correct' : null
+    isCorrect() {
+      // console.log(this.selected);
+      return this.selected ? 'correct' : null;
     },
-    showDate(datetime: string) {
-      return format(new Date(datetime), 'HH:mm')
-    },
-    reset() {
-      console.log('RESET TRAIN')
-      ;(this.$refs.inputRef as HTMLInputElement).value = ''
-      this.setShowRecommendations(false)
-      data.selected = false
-      data.recommendations = []
+    showTime(datetime: string) {
+      console.log(datetime);
+      return format(new Date(datetime), 'HH:mm');
     },
   },
-  components: {},
-})
+});
 </script>
 
 <template>
@@ -172,29 +145,26 @@ export default defineComponent({
       <label>Train:</label>
       <div class="query-field-input-big">
         <input
+          ref="inputRef"
           :disabled="!isActive"
           type="text"
-          :class="isCorrect(data.selected)"
-          @input="getRecommendations($event)"
-          @reset-train-result="reset()"
-          v-on:focus="setShowRecommendations(true)"
-          v-on:blur="setShowRecommendations(false)"
-          ref="inputRef"
+          :class="selected ? 'correct' : null"
+          @input="getRecommendations()"
+          @focus="setShowRecommendations(true)"
+          @blur="setShowRecommendations(false)"
         />
-        <span>
-          <sup ref="datetime" v-if="data.selected">{{ time }}</sup>
-          <sub ref="direction" v-if="data.selected"
-            ><span class="tight">--></span> {{ direction }}</sub
-          >
-          <label>{{ endpoint }}</label>
+        <span v-if="selected">
+          <sup ref="datetime">{{ showTime(selected.dateTime) }}</sup>
+          <sub ref="direction"><span class="tight">--></span> {{ selected.direction }}</sub>
         </span>
+        <label>{{ endpoint }}</label>
         <ul>
           <div v-if="showRecommendations">
-            <li v-for="rec in data.recommendations" v-bind:key="rec.detailsId">
+            <li v-for="rec in recommendations" :key="rec.detailsId">
               <h4>{{ rec.name }}</h4>
-              <sup>{{ showDate(rec.dateTime) }}</sup>
+              <sup>{{ showTime(rec.dateTime) }}</sup>
               <sub><span class="tight">--></span> {{ rec.direction }}</sub>
-              <div @click.stop="select($event)" :title="rec.name"></div>
+              <div :title="rec.name" @click.stop="select($event)"></div>
             </li>
           </div>
         </ul>

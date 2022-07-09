@@ -1,14 +1,14 @@
 <script lang="ts">
-import { ref, reactive, defineComponent } from 'vue'
-import { Station } from './types'
+import { ref, reactive, defineComponent } from 'vue';
+import { Station } from './types';
 
 let data = reactive({
   inputRef: '',
   recommendations: [] as Station[],
   // showRecommendations: true,
-  selected: false as false,
-})
-let inputRef = ref('')
+  selected: false as Station | false,
+});
+let inputRef = ref('');
 
 const getSpecific = (url: string) => {
   return fetch(url, {
@@ -21,32 +21,31 @@ const getSpecific = (url: string) => {
   })
     .then((res) => res.json())
     .then((items) => {
-      return items[0]
-    })
-}
+      return items[0];
+    });
+};
 
 export default defineComponent({
+  emits: ['reset-train-result', 'station-result'],
   data() {
     return {
       data,
       showRecommendations: false,
-      fetchURL:
-        'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/',
+      fetchURL: 'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/',
       endpoint: 'fahrplan/v1/location/{name}',
-    }
+    };
   },
   methods: {
     setSelected(value: Station | false) {
-      data.selected = value
-      this.$emit('station-result', value)
+      data.selected = value;
+      this.$emit('station-result', value);
     },
     getRecommendations(e: Event) {
       // emit event so train field can be reset
-      this.$emit('reset-train-result', true)
-      console.log('EMITTED')
+      this.$emit('reset-train-result', true);
 
-      const value = (e.target as HTMLInputElement)?.value
-      this.setSelected(false)
+      const value = (e.target as HTMLInputElement)?.value;
+      this.setSelected(false);
 
       if (value.length > 0) {
         fetch(this.fetchURL + value, {
@@ -59,46 +58,45 @@ export default defineComponent({
         })
           .then((res) => {
             if (res.ok) {
-              return res.json()
+              return res.json();
             } else {
-              console.error(res.status + ' ' + res.statusText)
+              console.error(res.status + ' ' + res.statusText);
             }
           })
           .then((d) => {
-            const stationResults: Array<Station> = d
-            data.recommendations = stationResults.slice(0, 10)
+            const stationResults: Array<Station> = d;
+            data.recommendations = stationResults.slice(0, 10);
 
-            if (
-              value.toLowerCase() === data.recommendations[0].name.toLowerCase()
-            ) {
-              this.setSelected(data.recommendations[0])
-              ;(this.$refs.inputRef as HTMLInputElement).value =
-                data.recommendations[0].name
+            if (value.toLowerCase() === data.recommendations[0].name.toLowerCase()) {
+              this.setSelected(data.recommendations[0]);
+              (this.$refs.inputRef as HTMLInputElement).value = data.recommendations[0].name;
+            } else {
+              this.$emit('reset-train-result', true);
             }
           })
-          .catch((err) => console.warn(err))
+          .catch((err) => console.warn(err));
       } else {
-        data.recommendations = []
+        data.recommendations = [];
       }
     },
     select(e: Event) {
-      const value = (e.target as HTMLLIElement).title
-      console.log(e)
-      ;(this.$refs.inputRef as HTMLInputElement).value = String(value)
+      const value = (e.target as HTMLLIElement).title;
+
+      (this.$refs.inputRef as HTMLInputElement).value = String(value);
       getSpecific(this.fetchURL + value).then((selection) => {
-        this.setSelected(selection)
-      })
+        this.setSelected(selection);
+      });
     },
     setShowRecommendations(view: boolean) {
       setTimeout(() => {
-        this.showRecommendations = view
-      }, 200)
+        this.showRecommendations = view;
+      }, 200);
     },
     isCorrect(selected: any): string | null {
-      return selected ? 'correct' : null
+      return selected ? 'correct' : null;
     },
   },
-})
+});
 </script>
 
 <template>
@@ -106,21 +104,21 @@ export default defineComponent({
     <label>Station:</label>
     <div class="query-field-input">
       <input
+        ref="inputRef"
         type="text"
         :class="isCorrect(data.selected)"
         @input="getRecommendations($event)"
-        v-on:focus="setShowRecommendations(true)"
-        v-on:blur="setShowRecommendations(false)"
-        ref="inputRef"
+        @focus="setShowRecommendations(true)"
+        @blur="setShowRecommendations(false)"
       />
       <label>{{ endpoint }}</label>
       <ul>
         <div v-if="showRecommendations">
           <li
             v-for="rec in data.recommendations"
-            v-bind:key="rec.id"
-            @click="select($event)"
+            :key="rec.id"
             :title="rec.name"
+            @click="select($event)"
           >
             {{ rec.name }}
           </li>

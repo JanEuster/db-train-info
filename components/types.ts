@@ -24,9 +24,7 @@ export type StationDetails = {
 
 }
 
-export type TrainDetails = {
-
-}
+export type TrainDetails = StationDetails[]
 
 export type Train = {
   boardId: number,
@@ -39,4 +37,17 @@ export type Train = {
   track: string,
   type: string,
   details?: TrainDetails,
+}
+
+export type TrainWithDetails = {
+  boardId: number,
+  dateTime: string,
+  detailsId: string,
+  direction: string,
+  name: string,
+  stopId: number,
+  stopName: string,
+  track: string,
+  type: string,
+  details: TrainDetails,
 }

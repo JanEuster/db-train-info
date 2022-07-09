@@ -1,16 +1,16 @@
 <script lang="ts" type="module">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 // import { parseEntities } from 'parse-entities'
-import { Train } from "../types";
-import journeyStation from "./journeyStation.vue";
+import { TrainWithDetails } from '../types';
+import journeyStation from './journeyStation.vue';
 
 export default defineComponent({
+  components: { journeyStation },
   props: {
-    train: { type: undefined, default: {} }
+    trainResult: { type: Object},
   },
   data() {
     return {
-      trainDetails: (this.train as Train).details,
     };
   },
   methods: {
@@ -20,25 +20,30 @@ export default defineComponent({
       // return parseEntities(entityString);
       // TODO: ENABLE ES MODULE IMPORTS ????? BECAUSE THAT SOMEHOW IS NOT A STANDARD FEATURE
       return entityString;
-    }
+    },
+    setTrain(train: TrainWithDetails) {
+      if (train === undefined) {
+        return false;
+      }
+      return true;
+    },
   },
-  components: { journeyStation }
-})
+});
 </script>
 
 <template>
-  <div class="journey-details-wrapper">
-    <header>
-      <h1>{{ entityReferenceToUTF8(train.name) }}</h1>
+  <div v-if="trainResult" class="journey-details-wrapper">
+    <header @train-result="setTrain($event)">
+      <h1>{{ entityReferenceToUTF8(trainResult.name) }}</h1>
       <h2>
-        {{ train.details[0].stopName }} <span class="tight">-----</span>
-        {{ train.details[train.details.length - 1].stopName }}
+        {{ trainResult.details[0].stopName }} <span class="tight">-----</span>
+        {{ trainResult.details[trainResult.details.length - 1].stopName }}
       </h2>
     </header>
-    <ul v-if="train.details !== undefined">
+    <ul>
       <journeyStation
-        v-for="(station, i) in train.details"
-        v-bind:key="i"
+        v-for="(station, i) in trainResult.details"
+        :key="i"
         :stationDetails="station"
       />
     </ul>
@@ -47,9 +52,9 @@ export default defineComponent({
 
 <style lang="scss">
 .journey-details-wrapper {
+  display: inline-block;
   border: 3px solid black;
-  margin-top: 30px;
-  min-width: 100%;
+  min-width: 300px;
   max-width: min(200%, 30vw);
   padding: 4px 8px;
 
