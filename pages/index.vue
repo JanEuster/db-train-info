@@ -4,6 +4,7 @@ import Vue, { ref } from 'vue'
 import { format } from 'date-fns'
 import QueryFieldStation from '@/components/queryFieldStation.vue';
 import QueryFieldTrain from '@/components/queryFieldTrain.vue';
+import JourneyDetails from '~/components/journeyDetails/journeyDetails.vue';
 
 type Station = {
   name: String;
@@ -22,7 +23,7 @@ let trainFieldActive = ref<boolean>(false);
 
 export default Vue.extend({
   name: "IndexPage",
-  components: { QueryFieldStation, QueryFieldTrain },
+  components: { QueryFieldStation, QueryFieldTrain, JourneyDetails },
   data() {
     return {
       stationResult,
@@ -46,6 +47,9 @@ export default Vue.extend({
   methods: {
     setStation(e: Station) {
       stationResult.value = e;
+      trainResult.value = undefined;
+
+      this.$emit("reset-train-result")
       this.generateTrainURL();
     },
     setTrain(e: Train) {
@@ -67,9 +71,12 @@ export default Vue.extend({
 
 
 <template>
-  <div class="query-wrapper">
-    <QueryFieldStation @station-result="setStation($event)" />
-    <QueryFieldTrain :isActive="trainFieldActive" :fetchURL="generateTrainURL()" @train-result="setTrain($event)" />
+  <div>
+    <div class="query-wrapper">
+      <QueryFieldStation @station-result="setStation($event)" />
+      <QueryFieldTrain :isActive="trainFieldActive" :fetchURL="generateTrainURL()" @train-result="setTrain($event)" />
+    </div>
+    <JourneyDetails v-if="trainResult" :train="trainResult" />
   </div>
 </template>
 

@@ -7,20 +7,20 @@ import { Station } from "./types";
 
 let data = reactive({
   inputRef: "",
-  recommendations: <Array<Station>>[],
+  recommendations: [] as Station[],
   // showRecommendations: true,
-  selected: <Station | false>false,
+  selected: false as false,
 });
 let inputRef = ref("")
 
 const getSpecific = (url: string) => {
   return fetch(url, {
     method: 'GET',
-    headers: <HeadersInit>{
+    headers: {
       'Content-Type': 'application/json',
       'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
       'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
-    }
+    } as HeadersInit
   })
     .then(res => res.json())
     .then(items => { return items[0] });
@@ -41,6 +41,10 @@ export default defineComponent({
       this.$emit("station-result", value);
     },
     getRecommendations(e: Event) {
+      // emit event so train field can be reset
+      this.$emit("reset-train-result", true);
+      console.log("EMITTED")
+
       const value = (e.target as HTMLInputElement)?.value;
       this.setSelected(false);
 
@@ -48,11 +52,11 @@ export default defineComponent({
 
         fetch(this.fetchURL + value, {
           method: 'GET',
-          headers: <HeadersInit>{
+          headers: {
             'Content-Type': 'application/json',
             'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
             'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
-          }
+          } as HeadersInit
         })
           .then(res => {
             if (res.ok) {
@@ -64,7 +68,6 @@ export default defineComponent({
           .then((d) => {
             const stationResults: Array<Station> = d;
             data.recommendations = stationResults.slice(0, 10);
-            (data.recommendations[0].name);
 
             if (value.toLowerCase() === data.recommendations[0].name.toLowerCase()) {
               this.setSelected(data.recommendations[0]);
@@ -85,7 +88,7 @@ export default defineComponent({
       });
     },
     setShowRecommendations(view: boolean) {
-      setTimeout(() => this.showRecommendations = view, 200);
+      setTimeout(() => { this.showRecommendations = view }, 200);
     },
     isCorrect(selected: any): string | null {
       return selected ? 'correct' : null
@@ -103,10 +106,11 @@ export default defineComponent({
         v-on:focus="setShowRecommendations(true)" v-on:blur="setShowRecommendations(false)" ref="inputRef" />
       <label>{{ endpoint }}</label>
       <ul>
-        <li v-if="showRecommendations" v-for="rec in data.recommendations" v-bind:key="rec.id" @click="select($event)"
-          :title="rec.name">
-          {{ rec.name }}
-        </li>
+        <div v-if="showRecommendations">
+          <li v-for="rec in data.recommendations" v-bind:key="rec.id" @click="select($event)" :title="rec.name">
+            {{ rec.name }}
+          </li>
+        </div>
       </ul>
     </div>
   </div>

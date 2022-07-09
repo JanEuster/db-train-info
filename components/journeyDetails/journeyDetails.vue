@@ -2,7 +2,7 @@
 import { defineComponent } from "vue";
 // import { parseEntities } from 'parse-entities'
 import { Train } from "../types";
-import Station from "./station.vue";
+import journeyStation from "./journeyStation.vue";
 
 export default defineComponent({
   props: {
@@ -22,7 +22,7 @@ export default defineComponent({
       return entityString;
     }
   },
-  components: { Station }
+  components: { journeyStation }
 })
 
 </script>
@@ -36,7 +36,7 @@ export default defineComponent({
       }}</h2>
     </header>
     <ul v-if="train.details !== undefined">
-      <Station v-for="(station, i) in train.details" v-bind:key="i" :stationDetails="station" />
+      <journeyStation v-for="(station, i) in train.details" v-bind:key="i" :stationDetails="station" />
     </ul>
   </div>
 </template>
