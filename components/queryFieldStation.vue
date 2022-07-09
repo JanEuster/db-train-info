@@ -1,17 +1,14 @@
-
 <script lang="ts">
-import { ref, reactive, defineComponent } from "vue";
-import { Station } from "./types";
-
-
+import { ref, reactive, defineComponent } from 'vue'
+import { Station } from './types'
 
 let data = reactive({
-  inputRef: "",
+  inputRef: '',
   recommendations: [] as Station[],
   // showRecommendations: true,
   selected: false as false,
-});
-let inputRef = ref("")
+})
+let inputRef = ref('')
 
 const getSpecific = (url: string) => {
   return fetch(url, {
@@ -20,10 +17,12 @@ const getSpecific = (url: string) => {
       'Content-Type': 'application/json',
       'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
       'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
-    } as HeadersInit
+    } as HeadersInit,
   })
-    .then(res => res.json())
-    .then(items => { return items[0] });
+    .then((res) => res.json())
+    .then((items) => {
+      return items[0]
+    })
 }
 
 export default defineComponent({
@@ -31,83 +30,98 @@ export default defineComponent({
     return {
       data,
       showRecommendations: false,
-      fetchURL: "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/",
-      endpoint: "fahrplan/v1/location/{name}",
+      fetchURL:
+        'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/',
+      endpoint: 'fahrplan/v1/location/{name}',
     }
   },
   methods: {
     setSelected(value: Station | false) {
-      data.selected = value;
-      this.$emit("station-result", value);
+      data.selected = value
+      this.$emit('station-result', value)
     },
     getRecommendations(e: Event) {
       // emit event so train field can be reset
-      this.$emit("reset-train-result", true);
-      console.log("EMITTED")
+      this.$emit('reset-train-result', true)
+      console.log('EMITTED')
 
-      const value = (e.target as HTMLInputElement)?.value;
-      this.setSelected(false);
+      const value = (e.target as HTMLInputElement)?.value
+      this.setSelected(false)
 
       if (value.length > 0) {
-
         fetch(this.fetchURL + value, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
             'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
-          } as HeadersInit
+          } as HeadersInit,
         })
-          .then(res => {
+          .then((res) => {
             if (res.ok) {
-              return res.json();
+              return res.json()
             } else {
-              console.error(res.status + " " + res.statusText);
+              console.error(res.status + ' ' + res.statusText)
             }
           })
           .then((d) => {
-            const stationResults: Array<Station> = d;
-            data.recommendations = stationResults.slice(0, 10);
+            const stationResults: Array<Station> = d
+            data.recommendations = stationResults.slice(0, 10)
 
-            if (value.toLowerCase() === data.recommendations[0].name.toLowerCase()) {
-              this.setSelected(data.recommendations[0]);
-              (this.$refs.inputRef as HTMLInputElement).value = data.recommendations[0].name;
+            if (
+              value.toLowerCase() === data.recommendations[0].name.toLowerCase()
+            ) {
+              this.setSelected(data.recommendations[0])
+              ;(this.$refs.inputRef as HTMLInputElement).value =
+                data.recommendations[0].name
             }
           })
-          .catch(err => console.warn(err))
+          .catch((err) => console.warn(err))
       } else {
-        data.recommendations = [];
+        data.recommendations = []
       }
     },
     select(e: Event) {
-      const value = (e.target as HTMLLIElement).title;
-      console.log(e);
-      (this.$refs.inputRef as HTMLInputElement).value = String(value);
-      getSpecific(this.fetchURL + value).then(selection => {
-        this.setSelected(selection);
-      });
+      const value = (e.target as HTMLLIElement).title
+      console.log(e)
+      ;(this.$refs.inputRef as HTMLInputElement).value = String(value)
+      getSpecific(this.fetchURL + value).then((selection) => {
+        this.setSelected(selection)
+      })
     },
     setShowRecommendations(view: boolean) {
-      setTimeout(() => { this.showRecommendations = view }, 200);
+      setTimeout(() => {
+        this.showRecommendations = view
+      }, 200)
     },
     isCorrect(selected: any): string | null {
       return selected ? 'correct' : null
-    }
-  }
-});
-
+    },
+  },
+})
 </script>
 
 <template>
   <div class="query-field">
     <label>Station:</label>
     <div class="query-field-input">
-      <input type="text" :class="isCorrect(data.selected)" @input="getRecommendations($event)"
-        v-on:focus="setShowRecommendations(true)" v-on:blur="setShowRecommendations(false)" ref="inputRef" />
+      <input
+        type="text"
+        :class="isCorrect(data.selected)"
+        @input="getRecommendations($event)"
+        v-on:focus="setShowRecommendations(true)"
+        v-on:blur="setShowRecommendations(false)"
+        ref="inputRef"
+      />
       <label>{{ endpoint }}</label>
       <ul>
         <div v-if="showRecommendations">
-          <li v-for="rec in data.recommendations" v-bind:key="rec.id" @click="select($event)" :title="rec.name">
+          <li
+            v-for="rec in data.recommendations"
+            v-bind:key="rec.id"
+            @click="select($event)"
+            :title="rec.name"
+          >
             {{ rec.name }}
           </li>
         </div>
@@ -166,10 +180,9 @@ export default defineComponent({
     z-index: 999;
     border: 2px solid black;
 
-
     &::before {
       position: absolute;
-      content: "";
+      content: '';
       background: black;
       top: -10px;
       left: 0;
@@ -190,7 +203,5 @@ export default defineComponent({
       }
     }
   }
-
-
 }
 </style>

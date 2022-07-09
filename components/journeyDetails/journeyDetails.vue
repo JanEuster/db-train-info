@@ -24,19 +24,23 @@ export default defineComponent({
   },
   components: { journeyStation }
 })
-
 </script>
 
 <template>
   <div class="journey-details-wrapper">
     <header>
       <h1>{{ entityReferenceToUTF8(train.name) }}</h1>
-      <h2>{{ train.details[0].stopName }} <span class="tight">-----</span> {{ train.details[train.details.length -
-          1].stopName
-      }}</h2>
+      <h2>
+        {{ train.details[0].stopName }} <span class="tight">-----</span>
+        {{ train.details[train.details.length - 1].stopName }}
+      </h2>
     </header>
     <ul v-if="train.details !== undefined">
-      <journeyStation v-for="(station, i) in train.details" v-bind:key="i" :stationDetails="station" />
+      <journeyStation
+        v-for="(station, i) in train.details"
+        v-bind:key="i"
+        :stationDetails="station"
+      />
     </ul>
   </div>
 </template>

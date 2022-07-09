@@ -1,15 +1,14 @@
 <script lang="ts">
-import { PropType } from "vue"
-import { StationDetails } from "../types"
+import { PropType } from 'vue'
+import { StationDetails } from '../types'
 
 export default {
   props: {
     stationDetails: undefined,
   },
   data() {
-    return {
-    }
-  }
+    return {}
+  },
 }
 </script>
 
@@ -19,6 +18,4 @@ export default {
   </div>
 </template>
 
-<style lang="">
-  
-</style>
+<style lang=""></style>
