@@ -34,7 +34,7 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
-    <ul>
+    <ul class="journey-stations">
       <journeyStation
         v-for="(station, i) in trainResult.details"
         :key="i"
@@ -48,9 +48,11 @@ export default defineComponent({
 .journey-details-wrapper {
   display: inline-block;
   border: 3px solid black;
-  min-width: 300px;
-  max-width: min(200%, 30vw);
+  min-width: 400px;
+  max-width: 100%;
   padding: 4px 8px;
+  min-height: 100%;
+  max-height: 100%;
 
   h1 {
     font-size: 22px;
@@ -63,6 +65,23 @@ export default defineComponent({
     line-height: 18px;
     font-weight: 600;
     font-style: italic;
+  }
+}
+
+.journey-stations {
+  margin-top: 10px;
+  padding-left: 50px;
+
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    width: 3px;
+    left: calc(50px + 3px);
+    height: calc(100% - 18px);
+    transform: translateY(9px);
+    background: black;
   }
 }
 </style>

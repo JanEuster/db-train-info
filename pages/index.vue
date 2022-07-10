@@ -95,7 +95,8 @@ export default Vue.extend({
 .query-wrapper {
   display: flex;
   align-items: flex-start;
-  margin-top: 20px;
+  padding: 20px 0;
+  height: 100vh;
 
   & > * {
     margin-left: 10px;
