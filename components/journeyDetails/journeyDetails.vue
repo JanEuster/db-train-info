@@ -1,7 +1,7 @@
 <script lang="ts" type="module">
 import { defineComponent } from "vue";
-// import { parseEntities } from 'parse-entities'
 import { TrainWithDetails } from "../types";
+import { HTMLEntityStringToUTF8 as toUTF8 } from "../functions";
 import journeyStation from "./journeyStation.vue";
 
 export default defineComponent({
@@ -10,16 +10,11 @@ export default defineComponent({
     trainResult: { type: Object },
   },
   data() {
-    return {};
+    return {
+      toUTF8,
+    };
   },
   methods: {
-    entityReferenceToUTF8(entityString: string) {
-      // fixes this bullshit the api returns; "stopName": "Berlin Hbf &#x0028;tief&#x0029;"
-      // -> "Berlin HBf (tief)"
-      // return parseEntities(entityString);
-      // TODO: ENABLE ES MODULE IMPORTS ????? BECAUSE THAT SOMEHOW IS NOT A STANDARD FEATURE
-      return entityString;
-    },
     setTrain(train: TrainWithDetails) {
       if (train === undefined) {
         return false;
@@ -33,10 +28,10 @@ export default defineComponent({
 <template>
   <div v-if="trainResult" class="journey-details-wrapper">
     <header @train-result="setTrain($event)">
-      <h1>{{ entityReferenceToUTF8(trainResult.name) }}</h1>
+      <h1>{{ toUTF8(trainResult.name) }}</h1>
       <h2>
-        {{ trainResult.details[0].stopName }} <span class="tight">-----</span>
-        {{ trainResult.details[trainResult.details.length - 1].stopName }}
+        {{ toUTF8(trainResult.details[0].stopName) }} <span class="tight">-----</span>
+        {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
     <ul>
