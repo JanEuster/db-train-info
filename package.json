@@ -8,7 +8,7 @@
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.ts,.vue\" --ignore-path .gitignore .",
-    "lint:prettier": "prettier --check .",
+    "lint:prettier": "prettier --check **/*.vue",
     "lint": "yarn lint:js && yarn lint:prettier",
     "prettier": "prettier --write **/*.vue",
     "lintfix": "prettier --write --list-different . && yarn lint:js --fix",
