@@ -1,17 +1,16 @@
 <script lang="ts" type="module">
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 // import { parseEntities } from 'parse-entities'
-import { TrainWithDetails } from '../types';
-import journeyStation from './journeyStation.vue';
+import { TrainWithDetails } from "../types";
+import journeyStation from "./journeyStation.vue";
 
 export default defineComponent({
   components: { journeyStation },
   props: {
-    trainResult: { type: Object},
+    trainResult: { type: Object },
   },
   data() {
-    return {
-    };
+    return {};
   },
   methods: {
     entityReferenceToUTF8(entityString: string) {

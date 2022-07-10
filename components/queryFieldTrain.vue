@@ -1,27 +1,26 @@
 <script lang="ts">
-import Fuse from 'fuse.js';
-import { ref, reactive, defineComponent } from 'vue';
-import { format } from 'date-fns';
-import { Train, TrainWithDetails } from './types';
-import JourneyDetails from './journeyDetails/journeyDetails.vue';
+import Fuse from "fuse.js";
+import { ref, reactive, defineComponent } from "vue";
+import { format } from "date-fns";
+import { Train, TrainWithDetails } from "./types";
+import JourneyDetails from "./journeyDetails/journeyDetails.vue";
 
-let inputRef = ref('');
+let inputRef = ref("");
 let recommendations = ref<Train[]>([]);
-
 
 const getSpecific = async (url: string, name: string) => {
   return await fetch(url, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-      'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
-      'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
+      "Content-Type": "application/json",
+      "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+      "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
     } as HeadersInit,
   })
     .then((res) => res.json())
     .then((items: Array<Train>) => {
       const fuse = new Fuse(items, {
-        keys: ['name', 'type', 'direction'],
+        keys: ["name", "type", "direction"],
         distance: 5,
       });
       const results = fuse.search(name);
@@ -33,33 +32,33 @@ export default defineComponent({
   props: {
     isActive: { type: Boolean, required: true },
     fetchURL: { type: String, required: true },
-    selected: { type: Object},
+    selected: { type: Object },
   },
-  emits: ['train-result'],
+  emits: ["train-result"],
   data() {
     return {
       recommendations,
       showRecommendations: false,
-      endpoint: 'fahrplan/v1/departureBoard/{id}?date',
+      endpoint: "fahrplan/v1/departureBoard/{id}?date",
     };
   },
   methods: {
     async getDetails(id: string) {
       return await fetch(
-        'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/' + id,
+        "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
-            'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
+            "Content-Type": "application/json",
+            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
           } as HeadersInit,
         }
       ).then((res) => {
         if (res.ok) {
           return res.json();
         } else {
-          console.error(res.status + ' ' + res.statusText);
+          console.error(res.status + " " + res.statusText);
         }
       });
     },
@@ -68,36 +67,36 @@ export default defineComponent({
         this.getDetails(value.detailsId).then((d) => {
           value.details = d;
 
-          this.$emit('train-result', value);
+          this.$emit("train-result", value);
         });
         (this.$refs.inputRef as HTMLInputElement).value = value.name;
       } else {
-        this.$emit('train-result', undefined);
+        this.$emit("train-result", undefined);
       }
     },
     getRecommendations() {
       const value = (this.$refs.inputRef as HTMLInputElement)?.value;
-      this.$emit('train-result', undefined);
+      this.$emit("train-result", undefined);
       if (value.length > 0) {
         fetch(this.fetchURL, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
-            'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
+            "Content-Type": "application/json",
+            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
           } as HeadersInit,
         })
           .then((res) => {
             if (res.ok) {
               return res.json();
             } else {
-              console.error(res.status + ' ' + res.statusText);
+              console.error(res.status + " " + res.statusText);
             }
           })
           .then((d) => {
             const trainResults: Array<any> = d;
             const fuse = new Fuse(trainResults, {
-              keys: ['name', 'type', 'direction'],
+              keys: ["name", "type", "direction"],
               distance: 7,
             });
             const results = fuse.search(value);
@@ -129,11 +128,11 @@ export default defineComponent({
     },
     isCorrect() {
       // console.log(this.selected);
-      return this.selected ? 'correct' : null;
+      return this.selected ? "correct" : null;
     },
     showTime(datetime: string) {
       console.log(datetime);
-      return format(new Date(datetime), 'HH:mm');
+      return format(new Date(datetime), "HH:mm");
     },
   },
 });
@@ -244,7 +243,7 @@ export default defineComponent({
 
     &::before {
       position: absolute;
-      content: '';
+      content: "";
       background: black;
       top: -10px;
       left: 0;

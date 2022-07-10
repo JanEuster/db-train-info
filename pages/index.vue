@@ -1,19 +1,18 @@
 <script lang="ts">
-import Vue, { ref } from 'vue';
-import { format } from 'date-fns';
-import QueryFieldStation from '@/components/queryFieldStation.vue';
-import QueryFieldTrain from '@/components/queryFieldTrain.vue';
-import JourneyDetails from '~/components/journeyDetails/journeyDetails.vue';
-import { Station, TrainWithDetails } from '~/components/types';
-
+import Vue, { ref } from "vue";
+import { format } from "date-fns";
+import QueryFieldStation from "@/components/queryFieldStation.vue";
+import QueryFieldTrain from "@/components/queryFieldTrain.vue";
+import JourneyDetails from "~/components/journeyDetails/journeyDetails.vue";
+import { Station, TrainWithDetails } from "~/components/types";
 
 let stationResult = ref<Station>();
 let trainResult = ref<TrainWithDetails>();
-let trainURL = ref<string>('');
+let trainURL = ref<string>("");
 let trainFieldActive = ref<boolean>(false);
 
 export default Vue.extend({
-  name: 'IndexPage',
+  name: "IndexPage",
   components: { QueryFieldStation, QueryFieldTrain, JourneyDetails },
   data() {
     return {
@@ -25,12 +24,12 @@ export default Vue.extend({
   },
   head() {
     return {
-      title: 'db-train-info',
+      title: "db-train-info",
       meta: [
         {
-          hid: 'description',
-          name: 'description',
-          content: 'My custom description',
+          hid: "description",
+          name: "description",
+          content: "My custom description",
         },
       ],
     };
@@ -48,17 +47,17 @@ export default Vue.extend({
     },
     generateTrainURL() {
       if (stationResult.value) {
-        const date = format(new Date(), 'yyyy-MM-dd') + 'T' + format(new Date(), 'HH:mm');
+        const date = format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm");
         trainFieldActive.value = true;
         return `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${stationResult.value.id}?date=${date}`;
       } else {
         trainFieldActive.value = false;
-        return '';
+        return "";
       }
     },
     isTrainActive() {
       return trainFieldActive.value;
-    }
+    },
   },
 });
 </script>
@@ -73,14 +72,14 @@ export default Vue.extend({
         @train-result="setTrain($event)"
         :selected="trainResult"
       />
-    <JourneyDetails v-if="trainResult" :trainResult="trainResult" />
+      <JourneyDetails v-if="trainResult" :trainResult="trainResult" />
     </div>
   </div>
 </template>
 
 <style lang="scss">
 :root {
-  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
 * {

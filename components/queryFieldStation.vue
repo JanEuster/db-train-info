@@ -1,22 +1,22 @@
 <script lang="ts">
-import { ref, reactive, defineComponent } from 'vue';
-import { Station } from './types';
+import { ref, reactive, defineComponent } from "vue";
+import { Station } from "./types";
 
 let data = reactive({
-  inputRef: '',
+  inputRef: "",
   recommendations: [] as Station[],
   // showRecommendations: true,
   selected: false as Station | false,
 });
-let inputRef = ref('');
+let inputRef = ref("");
 
 const getSpecific = (url: string) => {
   return fetch(url, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-      'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
-      'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
+      "Content-Type": "application/json",
+      "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+      "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
     } as HeadersInit,
   })
     .then((res) => res.json())
@@ -26,41 +26,41 @@ const getSpecific = (url: string) => {
 };
 
 export default defineComponent({
-  emits: ['reset-train-result', 'station-result'],
+  emits: ["reset-train-result", "station-result"],
   data() {
     return {
       data,
       showRecommendations: false,
-      fetchURL: 'https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/',
-      endpoint: 'fahrplan/v1/location/{name}',
+      fetchURL: "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/",
+      endpoint: "fahrplan/v1/location/{name}",
     };
   },
   methods: {
     setSelected(value: Station | false) {
       data.selected = value;
-      this.$emit('station-result', value);
+      this.$emit("station-result", value);
     },
     getRecommendations(e: Event) {
       // emit event so train field can be reset
-      this.$emit('reset-train-result', true);
+      this.$emit("reset-train-result", true);
 
       const value = (e.target as HTMLInputElement)?.value;
       this.setSelected(false);
 
       if (value.length > 0) {
         fetch(this.fetchURL + value, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'DB-Client-Id': process.env.NUXT_ENV_DB_CLIENT,
-            'DB-API-Key': process.env.NUXT_ENV_DB_API_KEY,
+            "Content-Type": "application/json",
+            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
           } as HeadersInit,
         })
           .then((res) => {
             if (res.ok) {
               return res.json();
             } else {
-              console.error(res.status + ' ' + res.statusText);
+              console.error(res.status + " " + res.statusText);
             }
           })
           .then((d) => {
@@ -71,7 +71,7 @@ export default defineComponent({
               this.setSelected(data.recommendations[0]);
               (this.$refs.inputRef as HTMLInputElement).value = data.recommendations[0].name;
             } else {
-              this.$emit('reset-train-result', true);
+              this.$emit("reset-train-result", true);
             }
           })
           .catch((err) => console.warn(err));
@@ -93,7 +93,7 @@ export default defineComponent({
       }, 200);
     },
     isCorrect(selected: any): string | null {
-      return selected ? 'correct' : null;
+      return selected ? "correct" : null;
     },
   },
 });
@@ -180,7 +180,7 @@ export default defineComponent({
 
     &::before {
       position: absolute;
-      content: '';
+      content: "";
       background: black;
       top: -10px;
       left: 0;
