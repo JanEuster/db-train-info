@@ -11,18 +11,25 @@ export type StationNotes = {
   text: string;
 };
 
-export type StationDetails = {
+interface StationDetailsBase {
   train: string;
   stopId: number;
   stopName: string;
   lat: string;
   lon: string;
-  depTime?: string;
-  arrTime?: string;
   type: string;
   operator: string;
   notes: StationNotes[];
-};
+}
+interface StationDetailsDeparture extends StationDetailsBase {
+  depTime: string;
+  arrTime?: never;
+}
+interface StationDetailsArrival extends StationDetailsBase {
+  depTime?: never;
+  arrTime: string;
+}
+export type StationDetails = StationDetailsDeparture | StationDetailsArrival;
 
 export type TrainDetails = StationDetails[];
 
