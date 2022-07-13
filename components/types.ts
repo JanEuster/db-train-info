@@ -17,7 +17,8 @@ export type StationDetails = {
   stopName: string;
   lat: string;
   lon: string;
-  depTime: string;
+  depTime?: string;
+  arrTime?: string;
   type: string;
   operator: string;
   notes: StationNotes[];

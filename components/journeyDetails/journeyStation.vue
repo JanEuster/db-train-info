@@ -1,7 +1,6 @@
 <script lang="ts">
-import { PropType } from "vue";
-import { StationDetails } from "../types";
 import { HTMLEntityStringToUTF8 as toUTF8 } from "../functions";
+import { StationDetails } from "../types";
 
 export default {
   props: {
@@ -12,12 +11,23 @@ export default {
       toUTF8,
     };
   },
+  methods: {
+    getDepartureOrArrivalTime(stationDetails: StationDetails): string | null {
+      if (stationDetails.depTime) {
+        return stationDetails.depTime;
+      } else if (stationDetails.arrTime) {
+        return stationDetails.arrTime;
+      } else {
+        return null;
+      }
+    }
+  }
 };
 </script>
 
 <template>
   <div class="station-wrapper">
-    <span class="before">{{ stationDetails.depTime ?? stationDetails.arrTime }} </span>
+    <span class="before">{{ getDepartureOrArrivalTime(stationDetails) }} </span>
     <h3>{{ toUTF8(stationDetails.stopName) }} <sub>stopId: {{ stationDetails.stopId }}</sub></h3>
   </div>
 </template>
