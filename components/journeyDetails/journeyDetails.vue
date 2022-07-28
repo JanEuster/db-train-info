@@ -3,9 +3,10 @@ import { defineComponent } from "vue";
 import { TrainWithDetails } from "../types";
 import { HTMLEntityStringToUTF8 as toUTF8 } from "../functions";
 import journeyStation from "./journeyStation.vue";
+import journeyMap from "./journeyMap.vue";
 
 export default defineComponent({
-  components: { journeyStation },
+  components: { journeyStation, journeyMap },
   props: {
     trainResult: { type: Object },
   },
@@ -34,6 +35,7 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
+    <journeyMap />
     <ul class="journey-stations">
       <journeyStation
         v-for="(station, i) in trainResult.details"
