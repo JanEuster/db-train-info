@@ -23,7 +23,7 @@ export default {
     name: "MapContainer",
     components: {},
     props: {
-        stationNames: Array,
+        stationNames: { type: Array, required: true },
     },
     async mounted() {
         // eslint-disable-next-line no-new
@@ -46,14 +46,11 @@ export default {
         });
         // this is where we create the OpenLayers map
         const points: number[][] = [];
-        console.log("this.stationNames", this.stationNames);
         for (const station of this.stationNames as string[]) {
-            console.log("station", station);
             await fetch(`https://nominatim.openstreetmap.org/search?q=${toUTF8(station)}&format=json`)
                 .then((value) => value.json())
                 .then((json) => {
                     const location = json[0];
-                    console.log(location);
 
                     points.push(fromLonLat([Number(location.lon), Number(location.lat)]));
                 });
