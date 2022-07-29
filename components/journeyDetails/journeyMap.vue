@@ -21,9 +21,9 @@ export default {
     name: "MapContainer",
     components: {},
     props: {
-        stationNames: { type: Array, required: true },
+        stationsPos: { type: Array, required: true },
     },
-    async mounted() {
+    mounted() {
         // eslint-disable-next-line no-new
         let map = new Map({
             // the map will be created using the 'map-root' ref
@@ -42,16 +42,9 @@ export default {
                 constrainResolution: true,
             }),
         });
-        // this is where we create the OpenLayers map
         const points: number[][] = [];
-        for (const station of this.stationNames as string[]) {
-            await fetch(`https://nominatim.openstreetmap.org/search?q=${toUTF8(station)}&format=json`)
-                .then((value) => value.json())
-                .then((json) => {
-                    const location = json[0];
-
-                    points.push(fromLonLat([Number(location.lon), Number(location.lat)]));
-                });
+        for (const p of this.stationsPos) {
+            points.push(fromLonLat(p));
         }
         const lineFeatures: Feature[] = [
             new Feature({
@@ -140,7 +133,8 @@ export default {
 <style lang="scss">
 #journey-map {
     width: 100%;
-    height: 300px;
+    height: 420px;
+    max-height: 70vh;
     margin-top: 12px;
 }
 

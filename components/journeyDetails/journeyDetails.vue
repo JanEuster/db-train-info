@@ -22,14 +22,13 @@ export default defineComponent({
       }
       return true;
     },
-    getStationNames(): string[] {
+    getStationPos(): string[] {
       if (this.trainResult) {
-        const names = [];
+        const pos = [];
         for (let station of (this.trainResult as TrainWithDetails).details) {
-          console.log(station.stopName);
-          names.push(station.stopName);
+          pos.push([station.lon, station.lat]);
         }
-        return names
+        return pos
       }
       return []
     }
@@ -46,7 +45,7 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
-    <journeyMap :stationNames="getStationNames()" class="map" />
+    <journeyMap :stationsPos="getStationPos()" class="map" />
     <div class="journey-stations-outer">
       <ul class="journey-stations">
         <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
@@ -60,7 +59,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   border: 3px solid black;
-  min-width: 400px;
+  min-width: 550px;
   max-width: 100%;
   padding: 4px 8px;
   min-height: 100%;
