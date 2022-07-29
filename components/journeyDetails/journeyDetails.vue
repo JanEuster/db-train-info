@@ -43,16 +43,19 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
-    <journeyMap :stationNames="getStationNames()" />
-    <ul class="journey-stations">
-      <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
-    </ul>
+    <journeyMap :stationNames="getStationNames()" class="map" />
+    <div class="journey-stations-outer">
+      <ul class="journey-stations">
+        <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
+      </ul>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
 .journey-details-wrapper {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   border: 3px solid black;
   min-width: 400px;
   max-width: 100%;
@@ -74,11 +77,25 @@ export default defineComponent({
   }
 }
 
-.journey-stations {
+.map {
+  flex-basis: 5;
+}
+
+.journey-stations-outer {
   margin-top: 10px;
+  overflow-y: hidden;
+  position: relative;
+  flex-basis: 1;
+}
+
+.journey-stations {
   padding-left: 50px;
 
-  position: relative;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &::before {
     content: "";
