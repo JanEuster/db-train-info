@@ -23,12 +23,15 @@ export default defineComponent({
       return true;
     },
     getStationNames(): string[] {
-      const names = [];
-      for (let station of (this.trainResult as TrainWithDetails).details) {
-        console.log(station.stopName);
-        names.push(station.stopName);
+      if (this.trainResult) {
+        const names = [];
+        for (let station of (this.trainResult as TrainWithDetails).details) {
+          console.log(station.stopName);
+          names.push(station.stopName);
+        }
+        return names
       }
-      return names
+      return []
     }
   },
 });
