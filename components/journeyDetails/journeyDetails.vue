@@ -22,6 +22,14 @@ export default defineComponent({
       }
       return true;
     },
+    getStationNames(): string[] {
+      const names = [];
+      for (let station of (this.trainResult as TrainWithDetails).details) {
+        console.log(station.stopName);
+        names.push(station.stopName);
+      }
+      return names
+    }
   },
 });
 </script>
@@ -35,13 +43,9 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
-    <journeyMap />
+    <journeyMap :stationNames="getStationNames()" />
     <ul class="journey-stations">
-      <journeyStation
-        v-for="(station, i) in trainResult.details"
-        :key="i"
-        :stationDetails="station"
-      />
+      <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
     </ul>
   </div>
 </template>
