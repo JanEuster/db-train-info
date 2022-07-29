@@ -3,9 +3,10 @@ import { defineComponent } from "vue";
 import { TrainWithDetails } from "../types";
 import { HTMLEntityStringToUTF8 as toUTF8 } from "../functions";
 import journeyStation from "./journeyStation.vue";
+import journeyMap from "./journeyMap.vue";
 
 export default defineComponent({
-  components: { journeyStation },
+  components: { journeyStation, journeyMap },
   props: {
     trainResult: { type: Object },
   },
@@ -21,6 +22,16 @@ export default defineComponent({
       }
       return true;
     },
+    getStationPos(): string[] {
+      if (this.trainResult) {
+        const pos = [];
+        for (let station of (this.trainResult as TrainWithDetails).details) {
+          pos.push([station.lon, station.lat]);
+        }
+        return pos
+      }
+      return []
+    }
   },
 });
 </script>
@@ -34,21 +45,21 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
-    <ul class="journey-stations">
-      <journeyStation
-        v-for="(station, i) in trainResult.details"
-        :key="i"
-        :stationDetails="station"
-      />
-    </ul>
+    <journeyMap :stationsPos="getStationPos()" class="map" />
+    <div class="journey-stations-outer">
+      <ul class="journey-stations">
+        <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
+      </ul>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
 .journey-details-wrapper {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   border: 3px solid black;
-  min-width: 400px;
+  min-width: 550px;
   max-width: 100%;
   padding: 4px 8px;
   min-height: 100%;
@@ -68,11 +79,25 @@ export default defineComponent({
   }
 }
 
-.journey-stations {
+.map {
+  flex-basis: 5;
+}
+
+.journey-stations-outer {
   margin-top: 10px;
+  overflow-y: hidden;
+  position: relative;
+  flex-basis: 1;
+}
+
+.journey-stations {
   padding-left: 50px;
 
-  position: relative;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &::before {
     content: "";

@@ -63,6 +63,7 @@ export default defineComponent({
       });
     },
     setSelected(value: Train | undefined) {
+      this.$emit("train-result", undefined);
       if (value) {
         this.getDetails(value.detailsId).then((d) => {
           value.details = d;
@@ -70,8 +71,6 @@ export default defineComponent({
           this.$emit("train-result", value);
         });
         (this.$refs.inputRef as HTMLInputElement).value = value.name;
-      } else {
-        this.$emit("train-result", undefined);
       }
     },
     getRecommendations() {
