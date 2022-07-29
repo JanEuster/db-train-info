@@ -2,8 +2,9 @@
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
-import OSM from "ol/source/OSM";
+import OSM, { ATTRIBUTION } from "ol/source/OSM";
 import Feature from "ol/Feature";
+import XYZ from "ol/source/XYZ";
 import { LineString, MultiPoint } from "ol/geom";
 import { Circle } from "ol/style";
 import VectorSource from "ol/source/Vector";
@@ -24,7 +25,7 @@ export default {
     },
     async mounted() {
         // eslint-disable-next-line no-new
-        new Map({
+        let map = new Map({
             // the map will be created using the 'map-root' ref
             target: this.$refs["map-root"],
             layers: [
@@ -67,7 +68,7 @@ export default {
             color: "#ADFF2F",
         });
         const stroke = new Stroke({
-            color: "black",
+            color: "rgba(0,0,0, 0.7)",
             width: 2.5,
         });
         const lineLayer = new VectorLayer({
@@ -94,14 +95,30 @@ export default {
         this.$refs["map-root"].innerHTML = "";
 
         // eslint-disable-next-line no-new
-        new Map({
+        const osmRail = new TileLayer({
+            visible: true,
+            source: new XYZ({
+                attributions: [
+                    ATTRIBUTION,
+                ],
+                url: 'http://{a-c}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
+                crossOrigin: null, // make it work inside canvas
+                tilePixelRatio: 2, // server returns 512px img for 256 tiles
+                maxZoom: 19, // XYZ's default is 18
+                opaque: true,
+            }),
+        })
+        osmRail.setOpacity(0.5);
+
+        map = new Map({
             // the map will be created using the 'map-root' ref
             target: this.$refs["map-root"],
             layers: [
                 // adding a background tiled layer
                 new TileLayer({
-                    source: new OSM(), // tiles are served by OpenStreetMap
+                    source: new OSM(),
                 }),
+                osmRail,
                 lineLayer,
             ],
 

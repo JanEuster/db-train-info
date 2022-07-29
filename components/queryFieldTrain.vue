@@ -142,8 +142,15 @@ export default defineComponent({
     <div class="query-field">
       <label>Train:</label>
       <div class="query-field-input-big">
-        <input ref="inputRef" :disabled="!isActive" type="text" :class="selected ? 'correct' : null"
-          @input="getRecommendations()" @focus="setShowRecommendations(true)" @blur="setShowRecommendations(false)" />
+        <input
+          ref="inputRef"
+          :disabled="!isActive"
+          type="text"
+          :class="selected ? 'correct' : null"
+          @input="getRecommendations()"
+          @focus="setShowRecommendations(true)"
+          @blur="setShowRecommendations(false)"
+        />
         <span v-if="selected">
           <sup ref="datetime">{{ showTime(selected.dateTime) }}</sup>
           <sub ref="direction"><span class="tight">--></span> {{ selected.direction }}</sub>
@@ -213,12 +220,12 @@ export default defineComponent({
     }
   }
 
-  span>sup {
+  span > sup {
     top: 16px;
     right: 7px;
   }
 
-  span>sub {
+  span > sub {
     bottom: 27px;
     left: 6px;
     word-wrap: break-word;
