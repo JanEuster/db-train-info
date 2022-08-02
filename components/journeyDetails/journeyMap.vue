@@ -5,8 +5,8 @@ import TileLayer from "ol/layer/Tile";
 import OSM, { ATTRIBUTION } from "ol/source/OSM";
 import Feature from "ol/Feature";
 import XYZ from "ol/source/XYZ";
-import { LineString, MultiPoint } from "ol/geom";
-import { Circle } from "ol/style";
+import { LineString, Point } from "ol/geom";
+import { Circle, Text } from "ol/style";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
@@ -21,7 +21,7 @@ export default {
     name: "MapContainer",
     components: {},
     props: {
-        stationsPos: { type: Array, required: true },
+        stations: { type: Array, required: true },
     },
     mounted() {
         // eslint-disable-next-line no-new
@@ -43,17 +43,22 @@ export default {
             }),
         });
         const points: number[][] = [];
-        for (const p of this.stationsPos) {
-            points.push(fromLonLat(p));
+        for (const station of this.stations) {
+            points.push(fromLonLat([station.lon, station.lat]))
         }
         const lineFeatures: Feature[] = [
             new Feature({
                 geometry: new LineString(points),
             }),
-            new Feature({
-                geometry: new MultiPoint(points),
-            }),
         ];
+        for (const station of this.stations) {
+            lineFeatures.push(new Feature({
+                geometry: new Point(fromLonLat([station.lon, station.lat])),
+                labelPoint: new Point(fromLonLat([station.lon, station.lat])),
+                name: toUTF8(station.stopName),
+            }));
+        }
+
         const lineSource = new VectorSource({
             features: lineFeatures,
         });
@@ -64,21 +69,40 @@ export default {
             color: "rgba(0,0,0, 0.7)",
             width: 2.5,
         });
+        const getText = (feature: Feature, resolution: number) => {
+            return resolution < 2100 ? new Text({
+                textAlign: "left",
+                textBaseline: "middle",
+                font: "10px Arial",
+                text: feature.get("name"),
+                fill: new Fill({ color: "white" }),
+                stroke: new Stroke({ color: "black", width: 5 }),
+                offsetX: 12,
+                offsetY: 0,
+                placement: "point",
+                maxAngle: 0,
+                overflow: false,
+                rotation: 0,
+            })
+                : null
+        };
+
         const lineLayer = new VectorLayer({
             source: lineSource,
-            style(feature, resolution) {
+            style(feature: Feature, resolution: number) {
                 const geo = feature.getGeometry();
                 if (geo instanceof LineString) {
                     return new Style({
                         stroke,
                     });
-                } else if (geo instanceof MultiPoint) {
+                } else if (geo instanceof Point) {
                     return new Style({
                         image: new Circle({
                             radius: 5,
                             fill,
                             stroke,
                         }),
+                        text: getText(feature, resolution),
                     });
                 }
             },

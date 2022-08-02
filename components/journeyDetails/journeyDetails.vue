@@ -45,7 +45,7 @@ export default defineComponent({
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
     </header>
-    <journeyMap :stationsPos="getStationPos()" class="map" />
+    <journeyMap :stations="trainResult.details" class="map" />
     <div class="journey-stations-outer">
       <ul class="journey-stations">
         <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
