@@ -45,6 +45,7 @@ export default defineComponent({
       // emit event so train field can be reset
       this.$emit("reset-train-result", true);
 
+      this.setSelected(false);
       const value = (e.target as HTMLInputElement)?.value;
 
       if (value.length > 0) {
@@ -80,6 +81,7 @@ export default defineComponent({
       }
     },
     select(e: Event) {
+      this.setSelected(false);
       const value = (e.target as HTMLLIElement).title;
 
       (this.$refs.inputRef as HTMLInputElement).value = String(value);

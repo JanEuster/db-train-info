@@ -37,7 +37,7 @@ export default Vue.extend({
   },
   methods: {
     setStation(e: Station) {
-      console.log(e)
+      console.log(e);
       stationResult.value = e;
       trainResult.value = undefined;
 
@@ -98,9 +98,7 @@ export default Vue.extend({
 .app {
   display: flex;
   align-items: flex-start;
-  padding: 20px 0;
   height: 100vh;
-
 }
 
 .query-wrapper {
@@ -108,7 +106,7 @@ export default Vue.extend({
   align-items: flex-start;
   flex-direction: column;
   padding: 20px;
-  height: 100vh;
+  max-height: calc(100vh - 40px);
 
   &>* {
     width: 100%;
