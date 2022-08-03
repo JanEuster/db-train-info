@@ -2,6 +2,7 @@
 import { defineComponent, ref } from "vue";
 import { format } from "date-fns";
 import { Train, TrainDetails } from "./types";
+import { HTMLEntityStringToUTF8 as toUTF8 } from "./functions";
 
 const trains = ref<Train[]>();
 
@@ -76,7 +77,7 @@ export default defineComponent({
   },
   methods: {
     getFromStationName(train: Train) {
-      return train.details ? train.details[0].stopName : "";
+      return train.details ? toUTF8(train.details[0].stopName) : "";
     },
     setTrain(train: Train) {
       this.$emit("train-result", undefined);
