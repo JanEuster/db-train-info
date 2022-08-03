@@ -37,7 +37,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div v-if="trainResult" class="journey-details-wrapper">
+  <div v-if="trainResult" class="journey-details-wrapper result-field">
     <header @train-result="setTrain($event)">
       <h1>{{ toUTF8(trainResult.name) }}</h1>
       <h2>
@@ -58,7 +58,6 @@ export default defineComponent({
 .journey-details-wrapper {
   display: flex;
   flex-direction: column;
-  border: 3px solid black;
   min-width: 550px;
   max-width: 100%;
   padding: 4px 8px;

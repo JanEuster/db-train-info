@@ -38,6 +38,7 @@ export default defineComponent({
   methods: {
     setSelected(value: Station | false) {
       data.selected = value;
+      this.$emit("station-result", false);
       this.$emit("station-result", value);
     },
     getRecommendations(e: Event) {
@@ -45,7 +46,6 @@ export default defineComponent({
       this.$emit("reset-train-result", true);
 
       const value = (e.target as HTMLInputElement)?.value;
-      this.setSelected(false);
 
       if (value.length > 0) {
         fetch(this.fetchURL + value, {
@@ -103,23 +103,12 @@ export default defineComponent({
   <div class="query-field">
     <label>Station:</label>
     <div class="query-field-input">
-      <input
-        ref="inputRef"
-        type="text"
-        :class="isCorrect(data.selected)"
-        @input="getRecommendations($event)"
-        @focus="setShowRecommendations(true)"
-        @blur="setShowRecommendations(false)"
-      />
+      <input ref="inputRef" type="text" :class="isCorrect(data.selected)" @input="getRecommendations($event)"
+        @focus="setShowRecommendations(true)" @blur="setShowRecommendations(false)" />
       <label>{{ endpoint }}</label>
       <ul>
         <div v-if="showRecommendations">
-          <li
-            v-for="rec in data.recommendations"
-            :key="rec.id"
-            :title="rec.name"
-            @click="select($event)"
-          >
+          <li v-for="rec in data.recommendations" :key="rec.id" :title="rec.name" @click="select($event)">
             {{ rec.name }}
           </li>
         </div>
@@ -129,14 +118,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.query-field {
-  display: inline-block;
-  padding: 12px;
-  padding-top: 8px;
-  padding-bottom: 16px;
-  border: 3px solid black;
-}
-
 .correct {
   background: greenyellow;
 }

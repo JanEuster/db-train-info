@@ -5,6 +5,7 @@ import QueryFieldStation from "@/components/queryFieldStation.vue";
 import QueryFieldTrain from "@/components/queryFieldTrain.vue";
 import JourneyDetails from "~/components/journeyDetails/journeyDetails.vue";
 import { Station, TrainWithDetails } from "~/components/types";
+import DepartureList from "~/components/departureList.vue";
 
 let stationResult = ref<Station>();
 let trainResult = ref<TrainWithDetails>();
@@ -13,7 +14,7 @@ let trainFieldActive = ref<boolean>(false);
 
 export default Vue.extend({
   name: "IndexPage",
-  components: { QueryFieldStation, QueryFieldTrain, JourneyDetails },
+  components: { QueryFieldStation, QueryFieldTrain, JourneyDetails, DepartureList },
   data() {
     return {
       stationResult,
@@ -36,6 +37,7 @@ export default Vue.extend({
   },
   methods: {
     setStation(e: Station) {
+      console.log(e)
       stationResult.value = e;
       trainResult.value = undefined;
 
@@ -63,17 +65,18 @@ export default Vue.extend({
 </script>
 
 <template>
-  <div>
+  <div class="app">
     <div class="query-wrapper">
-      <QueryFieldStation @station-result="setStation($event)" />
-      <QueryFieldTrain
-        :isActive="isTrainActive()"
-        :fetchURL="generateTrainURL()"
-        @train-result="setTrain($event)"
-        :selected="trainResult"
-      />
-      <JourneyDetails v-if="trainResult" :trainResult="trainResult" />
+      <div class="query-row">
+        <QueryFieldStation @station-result="setStation($event)" />
+        <QueryFieldTrain :isActive="isTrainActive()" :fetchURL="generateTrainURL()" @train-result="setTrain($event)"
+          :selected="trainResult" />
+      </div>
+      <div class="query-row" v-if="stationResult">
+        <DepartureList :departuresURL="generateTrainURL()" />
+      </div>
     </div>
+    <JourneyDetails v-if="trainResult" :trainResult="trainResult" />
   </div>
 </template>
 
@@ -92,14 +95,44 @@ export default Vue.extend({
   letter-spacing: -4px;
 }
 
-.query-wrapper {
+.app {
   display: flex;
   align-items: flex-start;
   padding: 20px 0;
   height: 100vh;
 
-  & > * {
-    margin-left: 10px;
+}
+
+.query-wrapper {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 20px;
+  height: 100vh;
+
+  &>* {
+    width: 100%;
   }
+}
+
+.query-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.query-field {
+  display: inline-block;
+  width: 100%;
+  padding: 12px;
+  padding-top: 8px;
+  padding-bottom: 16px;
+  margin: 6px 10px;
+}
+
+.query-field,
+.result-field {
+  border: 3px solid black;
 }
 </style>
