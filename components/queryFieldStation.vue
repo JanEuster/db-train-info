@@ -105,12 +105,23 @@ export default defineComponent({
   <div class="query-field">
     <label>Station:</label>
     <div class="query-field-input">
-      <input ref="inputRef" type="text" :class="isCorrect(data.selected)" @input="getRecommendations($event)"
-        @focus="setShowRecommendations(true)" @blur="setShowRecommendations(false)" />
+      <input
+        ref="inputRef"
+        type="text"
+        :class="isCorrect(data.selected)"
+        @input="getRecommendations($event)"
+        @focus="setShowRecommendations(true)"
+        @blur="setShowRecommendations(false)"
+      />
       <label>{{ endpoint }}</label>
       <ul>
         <div v-if="showRecommendations">
-          <li v-for="rec in data.recommendations" :key="rec.id" :title="rec.name" @click="select($event)">
+          <li
+            v-for="rec in data.recommendations"
+            :key="rec.id"
+            :title="rec.name"
+            @click="select($event)"
+          >
             {{ rec.name }}
           </li>
         </div>

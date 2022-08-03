@@ -1,10 +1,29 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { format } from "date-fns";
-import { Train } from "./types";
+import { Train, TrainDetails } from "./types";
 
 const trains = ref<Train[]>();
 
+const getDetails = async (id: string): Promise<TrainDetails> => {
+  return await fetch(
+    "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
+        "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+      } as HeadersInit,
+    }
+  ).then((res) => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      console.error(res.status + " " + res.statusText);
+    }
+  });
+};
 const getDepartures = (url: string) => {
   console.log("get departures");
 
@@ -26,6 +45,15 @@ const getDepartures = (url: string) => {
     .then((d) => {
       const trainResults: Array<Train> = d;
       console.log(trainResults);
+      for (let train of trainResults) {
+        getDetails(train.detailsId).then((res: TrainDetails) => {
+          if (res) {
+            train.details = res;
+          } else {
+            train.details = [];
+          }
+        });
+      }
       trains.value = trainResults;
     });
 };
@@ -46,8 +74,12 @@ export default defineComponent({
   },
   methods: {
     getTrainStartStation(train: Train) {
-      return train.details ? train.details[0] : "NA"
-    }
+      return train.details ? train.details[0] : "NA";
+    },
+    setTrain(train: Train) {
+      this.$emit("train-result", undefined);
+      this.$emit("train-result", train);
+    },
   },
 });
 </script>
@@ -64,7 +96,12 @@ export default defineComponent({
             <th>At</th>
             <th>Platform</th>
           </tr>
-          <tr class="table-data-row" v-for="train in trains" :key="train.detailsId">
+          <tr
+            class="table-data-row"
+            v-for="train in trains"
+            :key="train.detailsId"
+            @click="setTrain(train)"
+          >
             <td>{{ train.name }}</td>
             <td>{{ getTrainStartStation(train) }}</td>
             <td>{{ train.direction }}</td>
@@ -125,7 +162,7 @@ div .departure-table {
 }
 
 .table-data-row:hover {
-  color: #ADFF2F;
+  color: #adff2f;
 }
 
 .departure-table td:hover {

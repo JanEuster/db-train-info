@@ -69,11 +69,15 @@ export default Vue.extend({
     <div class="query-wrapper">
       <div class="query-row">
         <QueryFieldStation @station-result="setStation($event)" />
-        <QueryFieldTrain :isActive="isTrainActive()" :fetchURL="generateTrainURL()" @train-result="setTrain($event)"
-          :selected="trainResult" />
+        <QueryFieldTrain
+          :isActive="isTrainActive()"
+          :fetchURL="generateTrainURL()"
+          @train-result="setTrain($event)"
+          :selected="trainResult"
+        />
       </div>
       <div class="query-row" v-if="stationResult">
-        <DepartureList :departuresURL="generateTrainURL()" />
+        <DepartureList :departuresURL="generateTrainURL()" @train-result="setTrain($event)" />
       </div>
     </div>
     <JourneyDetails v-if="trainResult" :trainResult="trainResult" />
@@ -96,6 +100,7 @@ export default Vue.extend({
 }
 
 .app {
+  padding: 20px;
   display: flex;
   align-items: flex-start;
   height: 100vh;
@@ -105,10 +110,9 @@ export default Vue.extend({
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  padding: 20px;
   max-height: calc(100vh - 40px);
 
-  &>* {
+  & > * {
     width: 100%;
   }
 }
