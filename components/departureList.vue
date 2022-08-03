@@ -5,7 +5,7 @@ import { Train, TrainDetails } from "./types";
 
 const trains = ref<Train[]>();
 
-const getDetails = async (id: string): Promise<TrainDetails> => {
+const getDetails = async (id: string) => {
   return await fetch(
     "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
     {
@@ -18,15 +18,26 @@ const getDetails = async (id: string): Promise<TrainDetails> => {
     }
   ).then((res) => {
     if (res.ok) {
-      return res.json();
+      return res.json() as TrainDetails;
     } else {
       console.error(res.status + " " + res.statusText);
     }
   });
 };
+const getAllDetails = (trains: Train[]) => {
+  return new Promise<Train[]>((resolve, reject) => {
+    const trainResults: Array<Train> = trains;
+    for (const train of trainResults) {
+      getDetails(train.detailsId).then((d) => {
+        train.details = d;
+      });
+    }
+    setTimeout(() => {
+      resolve(trainResults);
+    }, 2000);
+  });
+};
 const getDepartures = (url: string) => {
-  console.log("get departures");
-
   fetch(url, {
     method: "GET",
     headers: {
@@ -43,18 +54,9 @@ const getDepartures = (url: string) => {
       }
     })
     .then((d) => {
-      const trainResults: Array<Train> = d;
-      console.log(trainResults);
-      for (let train of trainResults) {
-        getDetails(train.detailsId).then((res: TrainDetails) => {
-          if (res) {
-            train.details = res;
-          } else {
-            train.details = [];
-          }
-        });
-      }
-      trains.value = trainResults;
+      getAllDetails(d).then((trainResults: Train[]) => {
+        trains.value = trainResults;
+      });
     });
 };
 
@@ -73,12 +75,18 @@ export default defineComponent({
     };
   },
   methods: {
-    getTrainStartStation(train: Train) {
-      return train.details ? train.details[0] : "NA";
+    getFromStationName(train: Train) {
+      return train.details ? train.details[0].stopName : "";
     },
     setTrain(train: Train) {
       this.$emit("train-result", undefined);
-      this.$emit("train-result", train);
+      if (train) {
+        getDetails(train.detailsId).then((d) => {
+          train.details = d;
+
+          this.$emit("train-result", train);
+        });
+      }
     },
   },
 });
@@ -97,13 +105,13 @@ export default defineComponent({
             <th>Platform</th>
           </tr>
           <tr
-            class="table-data-row"
             v-for="train in trains"
             :key="train.detailsId"
+            class="table-data-row"
             @click="setTrain(train)"
           >
             <td>{{ train.name }}</td>
-            <td>{{ getTrainStartStation(train) }}</td>
+            <td>{{ getFromStationName(train) }}</td>
             <td>{{ train.direction }}</td>
             <td>{{ format(new Date(train.dateTime), "HH:mm") }}</td>
             <td>{{ train.track }}</td>

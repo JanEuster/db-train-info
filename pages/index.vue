@@ -37,14 +37,12 @@ export default Vue.extend({
   },
   methods: {
     setStation(e: Station) {
-      console.log(e);
       stationResult.value = e;
       trainResult.value = undefined;
 
       this.generateTrainURL();
     },
     setTrain(e: TrainWithDetails | undefined) {
-      console.log(e);
       trainResult.value = e;
     },
     generateTrainURL() {
@@ -77,7 +75,11 @@ export default Vue.extend({
         />
       </div>
       <div class="query-row" v-if="stationResult">
-        <DepartureList :departuresURL="generateTrainURL()" @train-result="setTrain($event)" />
+        <DepartureList
+          v-if="stationResult"
+          :departuresURL="generateTrainURL()"
+          @train-result="setTrain($event)"
+        />
       </div>
     </div>
     <JourneyDetails v-if="trainResult" :trainResult="trainResult" />

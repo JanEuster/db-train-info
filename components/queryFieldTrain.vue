@@ -43,8 +43,8 @@ export default defineComponent({
     };
   },
   methods: {
-    async getDetails(id: string) {
-      return await fetch(
+    getDetails(id: string) {
+      return fetch(
         "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
         {
           method: "GET",
