@@ -35,7 +35,7 @@ export default {
 <style lang="scss">
 .station-wrapper {
   position: relative;
-  
+
   &>* {
     padding-left: 20px;
   }
@@ -60,6 +60,7 @@ export default {
   h3 {
     position: relative;
   }
+
   h3 sub {
     position: absolute;
     right: 5px;

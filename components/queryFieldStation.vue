@@ -38,14 +38,15 @@ export default defineComponent({
   methods: {
     setSelected(value: Station | false) {
       data.selected = value;
+      this.$emit("station-result", false);
       this.$emit("station-result", value);
     },
     getRecommendations(e: Event) {
       // emit event so train field can be reset
       this.$emit("reset-train-result", true);
 
-      const value = (e.target as HTMLInputElement)?.value;
       this.setSelected(false);
+      const value = (e.target as HTMLInputElement)?.value;
 
       if (value.length > 0) {
         fetch(this.fetchURL + value, {
@@ -80,6 +81,7 @@ export default defineComponent({
       }
     },
     select(e: Event) {
+      this.setSelected(false);
       const value = (e.target as HTMLLIElement).title;
 
       (this.$refs.inputRef as HTMLInputElement).value = String(value);
@@ -129,14 +131,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.query-field {
-  display: inline-block;
-  padding: 12px;
-  padding-top: 8px;
-  padding-bottom: 16px;
-  border: 3px solid black;
-}
-
 .correct {
   background: greenyellow;
 }

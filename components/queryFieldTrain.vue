@@ -43,8 +43,8 @@ export default defineComponent({
     };
   },
   methods: {
-    async getDetails(id: string) {
-      return await fetch(
+    getDetails(id: string) {
+      return fetch(
         "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
         {
           method: "GET",
@@ -138,35 +138,33 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <div class="query-field">
-      <label>Train:</label>
-      <div class="query-field-input-big">
-        <input
-          ref="inputRef"
-          :disabled="!isActive"
-          type="text"
-          :class="selected ? 'correct' : null"
-          @input="getRecommendations()"
-          @focus="setShowRecommendations(true)"
-          @blur="setShowRecommendations(false)"
-        />
-        <span v-if="selected">
-          <sup ref="datetime">{{ showTime(selected.dateTime) }}</sup>
-          <sub ref="direction"><span class="tight">--></span> {{ selected.direction }}</sub>
-        </span>
-        <label>{{ endpoint }}</label>
-        <ul>
-          <div v-if="showRecommendations">
-            <li v-for="rec in recommendations" :key="rec.detailsId">
-              <h4>{{ rec.name }}</h4>
-              <sup>{{ showTime(rec.dateTime) }}</sup>
-              <sub><span class="tight">--></span> {{ rec.direction }}</sub>
-              <div :title="rec.name" @click.stop="select($event)"></div>
-            </li>
-          </div>
-        </ul>
-      </div>
+  <div class="query-field">
+    <label>Train:</label>
+    <div class="query-field-input-big">
+      <input
+        ref="inputRef"
+        :disabled="!isActive"
+        type="text"
+        :class="selected ? 'correct' : null"
+        @input="getRecommendations()"
+        @focus="setShowRecommendations(true)"
+        @blur="setShowRecommendations(false)"
+      />
+      <span v-if="selected">
+        <sup ref="datetime">{{ showTime(selected.dateTime) }}</sup>
+        <sub ref="direction"><span class="tight">--></span> {{ selected.direction }}</sub>
+      </span>
+      <label>{{ endpoint }}</label>
+      <ul>
+        <div v-if="showRecommendations">
+          <li v-for="rec in recommendations" :key="rec.detailsId">
+            <h4>{{ rec.name }}</h4>
+            <sup>{{ showTime(rec.dateTime) }}</sup>
+            <sub><span class="tight">--></span> {{ rec.direction }}</sub>
+            <div :title="rec.name" @click.stop="select($event)"></div>
+          </li>
+        </div>
+      </ul>
     </div>
   </div>
 </template>
@@ -179,7 +177,7 @@ export default defineComponent({
     border: 2px solid black;
     padding: 0px 4px;
     padding-bottom: 30px;
-    width: 190px;
+    width: 100%;
     height: 60px;
   }
 
