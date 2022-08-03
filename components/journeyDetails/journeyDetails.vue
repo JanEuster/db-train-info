@@ -22,9 +22,9 @@ export default defineComponent({
       }
       return true;
     },
-    getStationPos(): string[] {
+    getStationPos(): string[][] {
       if (this.trainResult) {
-        const pos = [];
+        const pos: string[][] = [];
         for (let station of (this.trainResult as TrainWithDetails).details) {
           pos.push([station.lon, station.lat]);
         }
@@ -37,7 +37,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div v-if="trainResult" class="journey-details-wrapper result-field">
+  <div v-if="trainResult.details && trainResult" class="journey-details-wrapper result-field">
     <header @train-result="setTrain($event)">
       <h1>{{ toUTF8(trainResult.name) }}</h1>
       <h2>
