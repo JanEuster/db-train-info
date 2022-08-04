@@ -106,6 +106,8 @@ export default Vue.extend({
   display: flex;
   align-items: flex-start;
   height: 100vh;
+  max-height: 100vh;
+  overflow-y: hidden;
 }
 
 .query-wrapper {
