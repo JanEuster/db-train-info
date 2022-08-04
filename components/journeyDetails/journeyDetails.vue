@@ -47,9 +47,11 @@ export default defineComponent({
     </header>
     <journeyMap :stations="trainResult.details" class="map" />
     <div class="journey-stations-outer">
-      <ul class="journey-stations">
-        <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
-      </ul>
+      <div class="journey-stations">
+        <ul>
+          <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -80,17 +82,22 @@ export default defineComponent({
 
 .map {
   flex-basis: 5;
+  margin-bottom: 15px;
 }
 
 .journey-stations-outer {
-  margin-top: 10px;
+  flex-basis: 1;
   overflow-y: hidden;
   position: relative;
-  flex-basis: 1;
+  height: 400px;
+
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
 }
 
 .journey-stations {
   padding-left: 50px;
+  max-height: 100%;
 
   overflow-y: scroll;
 
@@ -98,11 +105,17 @@ export default defineComponent({
     display: none;
   }
 
-  &::before {
+
+  & ul {
+    position: relative;
+  }
+
+  & ul::before {
     content: "";
     position: absolute;
     width: 3px;
-    left: calc(50px + 3px);
+    height: 100%;
+    left: 3px;
     height: calc(100% - 18px);
     transform: translateY(9px);
     background: black;
