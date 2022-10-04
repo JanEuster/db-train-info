@@ -17,7 +17,7 @@
   "dependencies": {
     "@types/he": "^1.1.2",
     "@vue-leaflet/vue-leaflet": "^0.6.1",
-    "core-js": "^3.19.3",
+    "core-js": "^3.25.5",
     "date-fns": "^2.28.0",
     "fuse.js": "^6.6.2",
     "he": "^1.2.0",
