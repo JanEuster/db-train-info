@@ -1,6 +1,7 @@
 <script lang="ts">
 import { ref, reactive, defineComponent } from "vue";
-import { Station } from "./types";
+import { mapMutations, mapActions, mapGetters } from "vuex";
+import { Station, ApiCredentials } from "./types";
 
 let data = reactive({
   inputRef: "",
@@ -10,13 +11,13 @@ let data = reactive({
 });
 let inputRef = ref("");
 
-const getSpecific = (url: string) => {
+const getSpecific = (apiCreds: ApiCredentials, url: string) => {
   return fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-      "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+      "DB-Client-Id": apiCreds.id,
+      "DB-API-Key": apiCreds.secret,
     } as HeadersInit,
   })
     .then((res) => res.json())
@@ -49,12 +50,13 @@ export default defineComponent({
       const value = (e.target as HTMLInputElement)?.value;
 
       if (value.length > 0) {
+        const apiCreds = this.getApiCreds();
         fetch(this.fetchURL + value, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+            "DB-Client-Id": apiCreds.id,
+            "DB-API-Key": apiCreds.secret,
           } as HeadersInit,
         })
           .then((res) => {
@@ -85,7 +87,8 @@ export default defineComponent({
       const value = (e.target as HTMLLIElement).title;
 
       (this.$refs.inputRef as HTMLInputElement).value = String(value);
-      getSpecific(this.fetchURL + value).then((selection) => {
+      const apiCreds = this.getApiCreds();
+      getSpecific(apiCreds, this.fetchURL + value).then((selection) => {
         this.setSelected(selection);
       });
     },
@@ -97,6 +100,9 @@ export default defineComponent({
     isCorrect(selected: any): string | null {
       return selected ? "correct" : null;
     },
+    ...mapGetters({
+      getApiCreds: "api/get",
+    }),
   },
 });
 </script>

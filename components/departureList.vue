@@ -1,20 +1,21 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { format } from "date-fns";
-import { Train, TrainDetails } from "./types";
+import { Train, TrainDetails, ApiCredentials } from "./types";
 import { HTMLEntityStringToUTF8 as toUTF8 } from "./functions";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 
 const trains = ref<Train[]>();
 
-const getDetails = async (id: string) => {
+const getDetails = async (apiCreds: ApiCredentials, id: string) => {
   return await fetch(
     "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-        "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+        "DB-Client-Id": apiCreds.id,
+        "DB-API-Key": apiCreds.secret,
       } as HeadersInit,
     }
   ).then((res) => {
@@ -25,11 +26,11 @@ const getDetails = async (id: string) => {
     }
   });
 };
-const getAllDetails = (trains: Train[]) => {
+const getAllDetails = (apiCreds: ApiCredentials, trains: Train[]) => {
   return new Promise<Train[]>((resolve, reject) => {
     const trainResults: Array<Train> = trains;
     for (const train of trainResults) {
-      getDetails(train.detailsId).then((d) => {
+      getDetails(apiCreds, train.detailsId).then((d) => {
         train.details = d;
       });
     }
@@ -38,13 +39,13 @@ const getAllDetails = (trains: Train[]) => {
     }, 2000);
   });
 };
-const getDepartures = (url: string) => {
+const getDepartures = (apiCreds: ApiCredentials, url: string) => {
   fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-      "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+      "DB-Client-Id": apiCreds.id,
+      "DB-API-Key": apiCreds.secret,
     } as HeadersInit,
   })
     .then((res) => {
@@ -55,7 +56,7 @@ const getDepartures = (url: string) => {
       }
     })
     .then((d) => {
-      getAllDetails(d).then((trainResults: Train[]) => {
+      getAllDetails(apiCreds, d).then((trainResults: Train[]) => {
         trains.value = trainResults;
       });
     });
@@ -65,9 +66,6 @@ export default defineComponent({
   props: {
     departuresURL: { type: String, required: true },
   },
-  setup(props) {
-    getDepartures(props.departuresURL);
-  },
   data() {
     return {
       trains,
@@ -75,20 +73,28 @@ export default defineComponent({
       format,
     };
   },
+  mounted() {
+    const apiCreds = this.getApiCreds() as ApiCredentials;
+    getDepartures(apiCreds, this.departuresURL);
+  },
   methods: {
     getFromStationName(train: Train) {
       return train.details ? toUTF8(train.details[0].stopName) : "";
     },
     setTrain(train: Train) {
+      const apiCreds = this.getApiCreds();
       this.$emit("train-result", undefined);
       if (train) {
-        getDetails(train.detailsId).then((d) => {
+        getDetails(apiCreds, train.detailsId).then((d) => {
           train.details = d;
 
           this.$emit("train-result", train);
         });
       }
     },
+    ...mapGetters({
+      getApiCreds: "api/get",
+    }),
   },
 });
 </script>

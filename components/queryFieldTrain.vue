@@ -2,19 +2,20 @@
 import Fuse from "fuse.js";
 import { ref, reactive, defineComponent } from "vue";
 import { format } from "date-fns";
-import { Train, TrainWithDetails } from "./types";
+import { Train, TrainWithDetails, ApiCredentials } from "./types";
 import JourneyDetails from "./journeyDetails/journeyDetails.vue";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 
 let inputRef = ref("");
 let recommendations = ref<Train[]>([]);
 
-const getSpecific = async (url: string, name: string) => {
+const getSpecific = async (apiCreds: ApiCredentials, url: string, name: string) => {
   return await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-      "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+      "DB-Client-Id": apiCreds.id,
+      "DB-API-Key": apiCreds.secret,
     } as HeadersInit,
   })
     .then((res) => res.json())
@@ -44,14 +45,15 @@ export default defineComponent({
   },
   methods: {
     getDetails(id: string) {
+      const apiCreds = this.getApiCreds();
       return fetch(
         "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/journeyDetails/" + id,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+            "DB-Client-Id": apiCreds.id,
+            "DB-API-Key": apiCreds.secret,
           } as HeadersInit,
         }
       ).then((res) => {
@@ -77,12 +79,13 @@ export default defineComponent({
       const value = (this.$refs.inputRef as HTMLInputElement)?.value;
       this.$emit("train-result", undefined);
       if (value.length > 0) {
+        const apiCreds = this.getApiCreds();
         fetch(this.fetchURL, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "DB-Client-Id": process.env.NUXT_ENV_DB_CLIENT,
-            "DB-API-Key": process.env.NUXT_ENV_DB_API_KEY,
+            "DB-Client-Id": apiCreds.id,
+            "DB-API-Key": apiCreds.secret,
           } as HeadersInit,
         })
           .then((res) => {
@@ -116,7 +119,8 @@ export default defineComponent({
     select(e: Event) {
       const value = (e.target as HTMLLIElement).title;
       (this.$refs.inputRef as HTMLInputElement).value = String(value);
-      getSpecific(this.fetchURL, value).then((selection) => {
+      const apiCreds = this.getApiCreds();
+      getSpecific(apiCreds, this.fetchURL, value).then((selection) => {
         this.setSelected(selection);
       });
     },
@@ -133,6 +137,9 @@ export default defineComponent({
       console.log(datetime);
       return format(new Date(datetime), "HH:mm");
     },
+    ...mapGetters({
+      getApiCreds: "api/get",
+    }),
   },
 });
 </script>

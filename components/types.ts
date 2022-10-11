@@ -58,3 +58,8 @@ export type TrainWithDetails = {
   type: string;
   details: TrainDetails;
 };
+
+export type ApiCredentials = {
+  id: string;
+  secret: string;
+};
