@@ -6,12 +6,36 @@
     <input id="api-client-id" />
     <label for="api-secret-key">Client Secret Key</label>
     <input type="password" id="api-secret-key" />
-    <button id="api-submit">Submit</button>
+    <button v-on:click="submitData" id="api-submit">Submit</button>
   </div>
 </template>
 
 <script lang="ts">
-export default {};
+import { mapMutations, mapActions, mapGetters } from "vuex";
+export default {
+  methods: {
+    async submitData() {
+      const id = (document.getElementById("api-client-id") as HTMLInputElement).value;
+      const secret = (document.getElementById("api-secret-key") as HTMLInputElement).value;
+      this.$store.commit("api/set", { id, secret });
+      if (await this.validateApiData()) {
+        console.log("db login successfull");
+        this.storeApiData();
+      }
+    },
+    ...mapGetters({
+      getApiData: "api/get",
+    }),
+    ...mapMutations({
+      loadApiData: "api/load",
+      storeApiData: "api/store",
+      setApiData: "api/set",
+    }),
+    ...mapActions({
+      validateApiData: "api/validate",
+    }),
+  },
+};
 </script>
 
 <style lang="scss">
