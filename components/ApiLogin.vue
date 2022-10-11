@@ -1,5 +1,5 @@
 <template>
-  <div class="api-login-wrapper">
+  <div :class="getWrapperClass()" v-on:click="edit">
     <span>Api Login Data</span>
 
     <label for="api-client-id">Client Id</label>
@@ -11,17 +11,46 @@
 </template>
 
 <script lang="ts">
+import { ref } from "vue";
 import { mapMutations, mapActions, mapGetters } from "vuex";
 export default {
+  setup() {
+    const validCreds = ref(false);
+    const editCreds = ref(false);
+    return {
+      validCreds,
+      editCreds,
+    };
+  },
+  mounted() {
+    this.loadApiData();
+    this.validCreds = this.validateApiData();
+    if (this.validCreds) {
+      let creds = this.getApiData();
+      (document.getElementById("api-client-id") as HTMLInputElement).value = creds.id;
+      (document.getElementById("api-secret-key") as HTMLInputElement).value = creds.secret;
+    }
+  },
   methods: {
     async submitData() {
       const id = (document.getElementById("api-client-id") as HTMLInputElement).value;
       const secret = (document.getElementById("api-secret-key") as HTMLInputElement).value;
       this.$store.commit("api/set", { id, secret });
       if (await this.validateApiData()) {
-        console.log("db login successfull");
+        console.log("request using db api creds successfull");
         this.storeApiData();
       }
+      this.editCreds = false;
+    },
+    getWrapperClass() {
+      if (this.validCreds && !this.editCreds) {
+        return "api-login-wrapper active";
+      }
+      return "api-login-wrapper";
+    },
+    edit() {
+      console.log("edit");
+      this.editCreds = true;
     },
     ...mapGetters({
       getApiData: "api/get",
@@ -42,6 +71,12 @@ export default {
 .active {
   cursor: pointer;
   background: greenyellow;
+
+  label,
+  input,
+  button {
+    display: none;
+  }
 }
 .api-login-wrapper {
   display: flex;
