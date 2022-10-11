@@ -3,6 +3,7 @@ import Vue, { ref } from "vue";
 import { format } from "date-fns";
 import QueryFieldStation from "@/components/queryFieldStation.vue";
 import QueryFieldTrain from "@/components/queryFieldTrain.vue";
+import ApiLogin from "@/components/ApiLogin.vue";
 import JourneyDetails from "~/components/journeyDetails/journeyDetails.vue";
 import { Station, TrainWithDetails } from "~/components/types";
 import DepartureList from "~/components/departureList.vue";
@@ -64,6 +65,7 @@ export default Vue.extend({
 
 <template>
   <div class="app">
+    <ApiLogin />
     <div class="query-wrapper">
       <div class="query-row">
         <QueryFieldStation @station-result="setStation($event)" />
