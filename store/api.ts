@@ -1,3 +1,5 @@
+import { ApiState } from "./types";
+
 export const state = () => ({
   clientId: "",
   clientSecret: "",
@@ -5,26 +7,26 @@ export const state = () => ({
 });
 
 export const getters = {
-  get(state) {
+  get(state: ApiState) {
     return { id: state.clientId, secret: state.clientSecret };
   },
-  isValid(state) {
+  isValid(state: ApiState) {
     return state.valid;
   },
 };
 
 export const mutations = {
-  set(state, { id, secret }) {
+  set(state: ApiState, { id, secret }: { id: string; secret: string }) {
     state.clientId = id;
     state.clientSecret = secret;
   },
-  load(state) {
+  load(state: ApiState) {
     // load stored values from local storage
-    const data = JSON.parse(localStorage.getItem("db-api-data"));
+    const data = JSON.parse(localStorage.getItem("db-api-data") ?? "");
     state.clientId = data.id;
     state.clientSecret = data.secret;
   },
-  store(state) {
+  store(state: ApiState) {
     // store state in local storage
     const data = JSON.stringify({ id: state.clientId, secret: state.clientSecret });
     localStorage.setItem("db-api-data", data);
@@ -32,7 +34,7 @@ export const mutations = {
 };
 
 export const actions = {
-  async validate({ state }) {
+  async validate({ state }: { state: ApiState }) {
     // if this request to the api works as it should the client id & secret are valid
     return await fetch(
       "https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/location/berlin",
