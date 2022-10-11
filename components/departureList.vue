@@ -20,11 +20,11 @@ const getDetails = async (apiCreds: ApiCredentials, id: string) => {
     }
   ).then((res) => {
     if (res.ok) {
-      return res.json() as TrainDetails;
+      return res.json();
     } else {
       console.error(res.status + " " + res.statusText);
     }
-  });
+  }).then(json => json as TrainDetails);
 };
 const getAllDetails = (apiCreds: ApiCredentials, trains: Train[]) => {
   return new Promise<Train[]>((resolve, reject) => {
