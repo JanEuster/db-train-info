@@ -16,7 +16,7 @@ import { mapMutations, mapActions, mapGetters } from "vuex";
 export default {
   setup() {
     const validCreds = ref(false);
-    const editCreds = ref(false);
+    const editCreds = ref(true);
     return {
       validCreds,
       editCreds,
@@ -39,8 +39,9 @@ export default {
       if (await this.validateApiData()) {
         console.log("request using db api creds successfull");
         this.storeApiData();
+        this.validCreds = true;
+        this.editCreds = false;
       }
-      this.editCreds = false;
     },
     getWrapperClass() {
       if (this.validCreds && !this.editCreds) {
