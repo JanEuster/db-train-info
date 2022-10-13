@@ -16,17 +16,18 @@ import { mapMutations, mapActions, mapGetters } from "vuex";
 export default {
   setup() {
     const validCreds = ref(false);
-    const editCreds = ref(true);
+    const wrapperClass = ref("api-login-wrapper");
     return {
       validCreds,
-      editCreds,
+      wrapperClass,
     };
   },
-  mounted() {
+  async mounted() {
     this.loadApiData();
-    this.validCreds = this.validateApiData();
-    if (this.validCreds) {
-      let creds = this.getApiData();
+    if (await this.validateApiData()) {
+      this.validCreds = true;
+      this.wrapperClass = "api-login-wrapper active";
+      const creds = this.getApiData();
       (document.getElementById("api-client-id") as HTMLInputElement).value = creds.id;
       (document.getElementById("api-secret-key") as HTMLInputElement).value = creds.secret;
     }
@@ -40,18 +41,14 @@ export default {
         console.log("request using db api creds successfull");
         this.storeApiData();
         this.validCreds = true;
-        this.editCreds = false;
+        this.wrapperClass = "api-login-wrapper active";
       }
     },
     getWrapperClass() {
-      if (this.validCreds && !this.editCreds) {
-        return "api-login-wrapper active";
-      }
-      return "api-login-wrapper";
+      return this.wrapperClass;
     },
     edit() {
-      console.log("edit");
-      this.editCreds = true;
+      this.wrapperClass = "api-login-wrapper";
     },
     ...mapGetters({
       getApiData: "api/get",
