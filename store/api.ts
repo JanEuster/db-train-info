@@ -22,9 +22,14 @@ export const mutations = {
   },
   load(state: ApiState) {
     // load stored values from local storage
-    const data = JSON.parse(localStorage.getItem("db-api-data") ?? "");
-    state.clientId = data.id;
-    state.clientSecret = data.secret;
+    try {
+      const data = JSON.parse(localStorage.getItem("db-api-data") ?? "");
+      state.clientId = data.id;
+      state.clientSecret = data.secret;
+    } catch (error) {
+      state.clientId = "";
+      state.clientSecret = "";
+    }
   },
   store(state: ApiState) {
     // store state in local storage
