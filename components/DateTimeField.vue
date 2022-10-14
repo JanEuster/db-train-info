@@ -92,10 +92,10 @@ export default defineComponent({
         <p>29</p>
         <p>30</p>
       </div>
-      <div>
+      <div class="bottom-row">
         <input type="time" name="time" value="14:45" />
+        <button name="ok-button" @click="isOpen = false">Ok</button>
       </div>
-      <button name="ok-button" @click="isOpen = false">Ok</button>
     </div>
   </div>
 </template>
@@ -139,11 +139,13 @@ export default defineComponent({
   select {
     border: 1px solid black;
     margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 10px 0;
+    height: 35px;
   }
   input[name="year"] {
     width: 95px;
     font-size: 25px;
-    height: 30px;
     padding: 5px;
     margin-bottom: 10px;
   }
@@ -167,18 +169,35 @@ export default defineComponent({
       align-items: center;
       border-radius: 8px;
       border: 1px solid black;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+      }
     }
   }
-  input[type="time"] {
-    font-size: 23px;
-    height: 30px;
+  .bottom-row {
+    height: 35px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     margin: 5px 0;
     margin-top: 10px;
   }
+  input[type="time"] {
+    text-align: center;
+    width: 140px;
+    height: 100%;
+    font-size: 22px;
+    padding: 0;
+    margin: 3px 0;
+  }
   button[name="ok-button"] {
-    text-align: right;
-    width: 100%;
     padding: 5px 10px;
+    font-size: 17px;
+    font-weight: bold;
   }
 }
 </style>
