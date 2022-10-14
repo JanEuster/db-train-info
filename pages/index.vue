@@ -1,17 +1,19 @@
 <script lang="ts">
 import Vue, { ref } from "vue";
 import { format } from "date-fns";
+
 import QueryFieldStation from "@/components/queryFieldStation.vue";
 import QueryFieldTrain from "@/components/queryFieldTrain.vue";
+import DateTimeField from "@/components/DateTimeField.vue";
 import ApiLogin from "@/components/ApiLogin.vue";
 import JourneyDetails from "~/components/journeyDetails/journeyDetails.vue";
 import { Station, TrainWithDetails } from "~/components/types";
 import DepartureList from "~/components/departureList.vue";
 
-let stationResult = ref<Station>();
-let trainResult = ref<TrainWithDetails>();
-let trainURL = ref<string>("");
-let trainFieldActive = ref<boolean>(false);
+const stationResult = ref<Station>();
+const trainResult = ref<TrainWithDetails>();
+const trainURL = ref<string>("");
+const trainFieldActive = ref<boolean>(false);
 
 export default Vue.extend({
   name: "IndexPage",
@@ -69,6 +71,7 @@ export default Vue.extend({
     <div class="query-wrapper">
       <div class="query-row">
         <QueryFieldStation @station-result="setStation($event)" />
+        <DateTimeField />
         <QueryFieldTrain
           :isActive="isTrainActive()"
           :fetchURL="generateTrainURL()"
@@ -126,16 +129,15 @@ export default Vue.extend({
 .query-row {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .query-field {
+  position: relative;
   display: inline-block;
-  width: 100%;
-  padding: 12px;
-  padding-top: 8px;
-  padding-bottom: 16px;
+  padding: 8px 12px;
   margin: 6px 10px;
 }
 
