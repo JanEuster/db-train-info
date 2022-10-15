@@ -1,10 +1,10 @@
 <script lang="ts">
 import { ref, defineComponent } from "vue";
+import { format } from "date-fns";
 import { daysInMonth, weekdayOfFirst, weekdayOfLast } from "./functions";
 
 export default defineComponent({
   setup() {
-    const today = new Date();
     const months = [
       "January",
       "Febuary",
@@ -20,37 +20,58 @@ export default defineComponent({
       "December",
     ];
     const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    const selectedDay = ref(today.getUTCDate());
-    const selectedMonthIndex = today.getUTCMonth();
-    const selectedMonth = ref(months[today.getUTCMonth()]);
-    const monthDays = daysInMonth(today.getUTCMonth(), today.getUTCFullYear());
-    const weekday = weekdayOfFirst(today.getUTCMonth(), today.getUTCFullYear());
-    const weekdayLast = weekdayOfLast(today.getUTCMonth(), today.getUTCFullYear());
+    const date = ref(new Date());
+    const selectedMonth = date.value.getUTCMonth();
 
     return {
-      selectedDay,
-      selectedMonthIndex,
+      date,
       selectedMonth,
-      monthDays,
-      weekday,
-      weekdayLast,
     };
   },
   data() {
     return {
-      date: "2022-10-14",
-      time: "14:45",
       isOpen: true,
       days: 30,
       yearMax: new Date().getUTCFullYear(),
     };
   },
+  computed: {
+    dateDisplay() {
+      return format(this.date, "yyyy-MM-dd");
+    },
+    time() {
+      return format(this.date, "HH:mm");
+    },
+    daysInMonth() {
+      // last day of prior month + 1 month
+      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDate();
+    },
+    weekdayFirst() {
+      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth(), 1).getDay();
+    },
+    weekdayLast() {
+      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDay();
+    },
+  },
   mounted() {
-    this.$refs.month.selectedIndex = this.selectedMonthIndex;
+    this.$refs.month.selectedIndex = this.selectedMonth;
+    this.selectDay(this.date.getDate());
   },
   methods: {
+    day() {
+      return this.date.getDate();
+    },
     selectDay(day: number) {
-      this.selectedDay = day;
+      const previous = document.getElementsByName(
+        "calender-day-" + String(this.date.getDate() + 1)
+      )[0];
+      previous.dataset.selected = "false";
+      this.date.setDate(day);
+      const current = document.getElementsByName("calender-day-" + String(day + 1))[0];
+      current.dataset.selected = "true";
+    },
+    calenderDateName(day: number) {
+      return "calender-day-" + day;
     },
   },
 });
@@ -59,7 +80,7 @@ export default defineComponent({
 <template>
   <div class="query-field">
     <div class="date-time-display" @click="isOpen = !isOpen">
-      <p>{{ date }}</p>
+      <p>{{ dateDisplay }}</p>
       <hr />
       <p>{{ time }}</p>
     </div>
@@ -79,18 +100,15 @@ export default defineComponent({
         <option value="November">November</option>
         <option value="December">December</option>
       </select>
-      <div class="calender-dates">
-        <div v-for="i in weekday - 0" class="other-month"><div></div></div>
-        <div v-for="i in monthDays" v-if="i == selectedDay">
-          <div class="selected">{{ i }}</div>
-        </div>
-        <div v-else>
-          <div @click="selectDay(i)">{{ i }}</div>
+      <div ref="calender_dates" class="calender-dates">
+        <div v-for="i in weekdayFirst" class="other-month"><div></div></div>
+        <div v-for="i in daysInMonth">
+          <div :name="calenderDateName(i + 1)" @click="selectDay(i)">{{ i }}</div>
         </div>
         <div v-for="i in 6 - weekdayLast" class="other-month"><div></div></div>
       </div>
       <div class="bottom-row">
-        <input type="time" name="time" value="14:45" />
+        <input type="time" name="time" :value="time" />
         <button name="ok-button" @click="isOpen = false">Ok</button>
       </div>
     </div>
@@ -175,7 +193,7 @@ export default defineComponent({
         color: white;
       }
     }
-    .selected {
+    & > div > div[data-selected="true"] {
       background: black;
       color: white;
     }
