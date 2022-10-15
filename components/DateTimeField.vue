@@ -1,5 +1,6 @@
-<script>
+<script lang="ts">
 import { ref, defineComponent } from "vue";
+import { daysInMonth, weekdayOfFirst, weekdayOfLast } from "./functions";
 
 export default defineComponent({
   setup() {
@@ -18,12 +19,21 @@ export default defineComponent({
       "November",
       "December",
     ];
+    const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const selectedDay = ref(today.getUTCDate());
+    const selectedMonthIndex = today.getUTCMonth();
     const selectedMonth = ref(months[today.getUTCMonth()]);
-    console.log(selectedMonth);
+    const monthDays = daysInMonth(today.getUTCMonth(), today.getUTCFullYear());
+    const weekday = weekdayOfFirst(today.getUTCMonth(), today.getUTCFullYear());
+    const weekdayLast = weekdayOfLast(today.getUTCMonth(), today.getUTCFullYear());
+
     return {
       selectedDay,
+      selectedMonthIndex,
       selectedMonth,
+      monthDays,
+      weekday,
+      weekdayLast,
     };
   },
   data() {
@@ -34,6 +44,14 @@ export default defineComponent({
       days: 30,
       yearMax: new Date().getUTCFullYear(),
     };
+  },
+  mounted() {
+    this.$refs.month.selectedIndex = this.selectedMonthIndex;
+  },
+  methods: {
+    selectDay(day: number) {
+      this.selectedDay = day;
+    },
   },
 });
 </script>
@@ -47,7 +65,7 @@ export default defineComponent({
     </div>
     <div v-if="isOpen" class="date-time-picker">
       <input type="number" min="2000" :max="yearMax" name="year" :value="yearMax" />
-      <select name="month" class="calender-month">
+      <select ref="month" name="month" class="calender-month">
         <option value="January">January</option>
         <option value="Febuary">Febuary</option>
         <option value="March">March</option>
@@ -57,40 +75,19 @@ export default defineComponent({
         <option value="Juli">Juli</option>
         <option value="August">August</option>
         <option value="September">September</option>
+        <option value="October">October</option>
         <option value="November">November</option>
         <option value="December">December</option>
       </select>
       <div class="calender-dates">
-        <p>1</p>
-        <p>2</p>
-        <p>3</p>
-        <p>4</p>
-        <p>5</p>
-        <p>6</p>
-        <p>7</p>
-        <p>8</p>
-        <p>9</p>
-        <p>10</p>
-        <p>11</p>
-        <p>12</p>
-        <p>13</p>
-        <p>14</p>
-        <p>15</p>
-        <p>16</p>
-        <p>17</p>
-        <p>18</p>
-        <p>19</p>
-        <p>20</p>
-        <p>21</p>
-        <p>22</p>
-        <p>23</p>
-        <p>24</p>
-        <p>25</p>
-        <p>26</p>
-        <p>27</p>
-        <p>28</p>
-        <p>29</p>
-        <p>30</p>
+        <div v-for="i in weekday - 0" class="other-month"><div></div></div>
+        <div v-for="i in monthDays" v-if="i == selectedDay">
+          <div class="selected">{{ i }}</div>
+        </div>
+        <div v-else>
+          <div @click="selectDay(i)">{{ i }}</div>
+        </div>
+        <div v-for="i in 6 - weekdayLast" class="other-month"><div></div></div>
       </div>
       <div class="bottom-row">
         <input type="time" name="time" value="14:45" />
@@ -160,7 +157,9 @@ export default defineComponent({
     gap: 5px;
     grid-template-columns: repeat(7, auto);
     grid-template-rows: repeat(5, auto);
-    p {
+    & > div > div {
+      width: 100%;
+      height: 100%;
       font-size: 12px;
       font-weight: bold;
       color: black;
@@ -175,6 +174,14 @@ export default defineComponent({
         background: rgba(0, 0, 0, 0.75);
         color: white;
       }
+    }
+    .selected {
+      background: black;
+      color: white;
+    }
+    .other-month > div {
+      border: 0;
+      background: rgba(0, 0, 0, 0.55);
     }
   }
   .bottom-row {
