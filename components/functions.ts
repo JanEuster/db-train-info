@@ -4,13 +4,3 @@ export const HTMLEntityStringToUTF8 = (entityString: string) => {
   // -> "Berlin HBf (tief)"
   return entityDecode(entityString);
 };
-export const daysInMonth = (month: number, year: number) => {
-  // last day of prior month + 1 month
-  return new Date(year, month + 1, 0).getDate();
-};
-export const weekdayOfFirst = (month: number, year: number) => {
-  return new Date(year, month, 1).getDay();
-};
-export const weekdayOfLast = (month: number, year: number) => {
-  return new Date(year, month + 1, 0).getDay();
-};
