@@ -1,49 +1,57 @@
 <script lang="ts">
 import Fuse from "fuse.js";
 import { ref, reactive, defineComponent } from "vue";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 import { format } from "date-fns";
 import { Train, TrainWithDetails, ApiCredentials } from "./types";
 import JourneyDetails from "./journeyDetails/journeyDetails.vue";
-import { mapMutations, mapActions, mapGetters } from "vuex";
-
-let inputRef = ref("");
-let recommendations = ref<Train[]>([]);
-
-const getSpecific = async (apiCreds: ApiCredentials, url: string, name: string) => {
-  return await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "DB-Client-Id": apiCreds.id,
-      "DB-API-Key": apiCreds.secret,
-    } as HeadersInit,
-  })
-    .then((res) => res.json())
-    .then((items: Array<Train>) => {
-      const fuse = new Fuse(items, {
-        keys: ["name", "type", "direction"],
-        distance: 5,
-      });
-      const results = fuse.search(name);
-      return results[0].item;
-    });
-};
 
 export default defineComponent({
   props: {
     isActive: { type: Boolean, required: true },
-    fetchURL: { type: String, required: true },
+    stationId: Number,
+    date: Date,
     selected: { type: Object },
   },
   emits: ["train-result"],
-  data() {
+  setup() {
+    const recommendations = ref<Train[]>([]);
     return {
       recommendations,
+    };
+  },
+  data() {
+    return {
       showRecommendations: false,
       endpoint: "fahrplan/v1/departureBoard/{id}?date",
     };
   },
   methods: {
+    async getSpecific(name: string) {
+      const apiCreds = this.getApiCreds();
+      const dateStr = format(this.date, "yyyy-MM-dd") + "T" + format(this.date, "HH:mm");
+      console.log(dateStr);
+      return await fetch(
+        `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${this.stationId}?date=${dateStr}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "DB-Client-Id": apiCreds.id,
+            "DB-API-Key": apiCreds.secret,
+          } as HeadersInit,
+        }
+      )
+        .then((res) => res.json())
+        .then((items: Array<Train>) => {
+          const fuse = new Fuse(items, {
+            keys: ["name", "type", "direction"],
+            distance: 5,
+          });
+          const results = fuse.search(name);
+          return results[0].item;
+        });
+    },
     getDetails(id: string) {
       const apiCreds = this.getApiCreds();
       return fetch(
@@ -79,15 +87,20 @@ export default defineComponent({
       const value = (this.$refs.inputRef as HTMLInputElement)?.value;
       this.$emit("train-result", undefined);
       if (value.length > 0) {
+        const dateStr = format(this.date, "yyyy-MM-dd") + "T" + format(this.date, "HH:mm");
+        console.log(dateStr);
         const apiCreds = this.getApiCreds();
-        fetch(this.fetchURL, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "DB-Client-Id": apiCreds.id,
-            "DB-API-Key": apiCreds.secret,
-          } as HeadersInit,
-        })
+        fetch(
+          `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${this.stationId}?date=${dateStr}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "DB-Client-Id": apiCreds.id,
+              "DB-API-Key": apiCreds.secret,
+            } as HeadersInit,
+          }
+        )
           .then((res) => {
             if (res.ok) {
               return res.json();
@@ -102,17 +115,17 @@ export default defineComponent({
               distance: 7,
             });
             const results = fuse.search(value);
-            recommendations.value = results.map((r) => r.item).slice(0, 10);
-            if (value.toLowerCase() === recommendations.value[0].name.toLowerCase()) {
-              this.setSelected(recommendations.value[0]);
-              (this.$refs.inputRef as HTMLInputElement).value = recommendations.value[0].name;
+            this.recommendations = results.map((r) => r.item).slice(0, 10);
+            if (value.toLowerCase() === this.recommendations[0].name.toLowerCase()) {
+              this.setSelected(this.recommendations[0]);
+              (this.$refs.inputRef as HTMLInputElement).value = this.recommendations[0].name;
             } else {
               this.setSelected(undefined);
             }
           })
           .catch((err) => console.warn(err));
       } else {
-        recommendations.value = [];
+        this.recommendations = [];
         this.setSelected(undefined);
       }
     },
@@ -120,7 +133,7 @@ export default defineComponent({
       const value = (e.target as HTMLLIElement).title;
       (this.$refs.inputRef as HTMLInputElement).value = String(value);
       const apiCreds = this.getApiCreds();
-      getSpecific(apiCreds, this.fetchURL, value).then((selection) => {
+      this.getSpecific(value).then((selection) => {
         this.setSelected(selection);
       });
     },
@@ -134,7 +147,6 @@ export default defineComponent({
       return this.selected ? "correct" : null;
     },
     showTime(datetime: string) {
-      console.log(datetime);
       return format(new Date(datetime), "HH:mm");
     },
     ...mapGetters({
