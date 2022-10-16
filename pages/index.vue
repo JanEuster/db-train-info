@@ -1,28 +1,33 @@
 <script lang="ts">
 import Vue, { ref } from "vue";
 import { format } from "date-fns";
+
 import QueryFieldStation from "@/components/queryFieldStation.vue";
 import QueryFieldTrain from "@/components/queryFieldTrain.vue";
+import DateTimeField from "@/components/DateTimeField.vue";
 import ApiLogin from "@/components/ApiLogin.vue";
 import JourneyDetails from "~/components/journeyDetails/journeyDetails.vue";
 import { Station, TrainWithDetails } from "~/components/types";
 import DepartureList from "~/components/departureList.vue";
 
-let stationResult = ref<Station>();
-let trainResult = ref<TrainWithDetails>();
-let trainURL = ref<string>("");
-let trainFieldActive = ref<boolean>(false);
-
 export default Vue.extend({
   name: "IndexPage",
   components: { QueryFieldStation, QueryFieldTrain, JourneyDetails, DepartureList },
-  data() {
+  setup() {
+    const stationResult = ref<Station>();
+    const trainResult = ref<TrainWithDetails>();
+    const trainURL = ref<string>("");
+    const date = ref(new Date());
+    date.value.setUTCFullYear(2020);
     return {
       stationResult,
-      trainURL,
       trainResult,
-      trainFieldActive,
+      trainURL,
+      date,
     };
+  },
+  data() {
+    return {};
   },
   head() {
     return {
@@ -38,26 +43,22 @@ export default Vue.extend({
   },
   methods: {
     setStation(e: Station) {
-      stationResult.value = e;
-      trainResult.value = undefined;
-
-      this.generateTrainURL();
+      this.stationResult = e;
+      this.trainResult = undefined;
     },
     setTrain(e: TrainWithDetails | undefined) {
-      trainResult.value = e;
-    },
-    generateTrainURL() {
-      if (stationResult.value) {
-        const date = format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm");
-        trainFieldActive.value = true;
-        return `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${stationResult.value.id}?date=${date}`;
-      } else {
-        trainFieldActive.value = false;
-        return "";
-      }
+      this.trainResult = e;
     },
     isTrainActive() {
-      return trainFieldActive.value;
+      return this.stationResult ? true : false;
+    },
+    setDate(e: Date) {
+      this.date = e;
+      const stationResult = this.stationResult;
+      this.stationResult = undefined;
+      setTimeout(() => {
+        this.stationResult = stationResult;
+      }, 50);
     },
   },
 });
@@ -69,9 +70,11 @@ export default Vue.extend({
     <div class="query-wrapper">
       <div class="query-row">
         <QueryFieldStation @station-result="setStation($event)" />
+        <DateTimeField @date-change="setDate($event)" />
         <QueryFieldTrain
           :isActive="isTrainActive()"
-          :fetchURL="generateTrainURL()"
+          :stationId="stationResult ? stationResult.id : 0"
+          :date="date"
           @train-result="setTrain($event)"
           :selected="trainResult"
         />
@@ -79,7 +82,8 @@ export default Vue.extend({
       <div class="query-row" v-if="stationResult">
         <DepartureList
           v-if="stationResult"
-          :departuresURL="generateTrainURL()"
+          :stationId="stationResult.id"
+          :date="date"
           @train-result="setTrain($event)"
         />
       </div>
@@ -126,16 +130,15 @@ export default Vue.extend({
 .query-row {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .query-field {
+  position: relative;
   display: inline-block;
-  width: 100%;
-  padding: 12px;
-  padding-top: 8px;
-  padding-bottom: 16px;
+  padding: 8px 12px;
   margin: 6px 10px;
 }
 

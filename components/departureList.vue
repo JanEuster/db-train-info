@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 import { format } from "date-fns";
 import { Train, TrainDetails, ApiCredentials } from "./types";
 import { HTMLEntityStringToUTF8 as toUTF8 } from "./functions";
-import { mapMutations, mapActions, mapGetters } from "vuex";
 
 const trains = ref<Train[]>();
 
@@ -18,15 +18,17 @@ const getDetails = async (apiCreds: ApiCredentials, id: string) => {
         "DB-API-Key": apiCreds.secret,
       } as HeadersInit,
     }
-  ).then((res) => {
-    if (res.ok) {
-      return res.json();
-    } else {
-      console.error(res.status + " " + res.statusText);
-    }
-  }).then(json => json as TrainDetails);
+  )
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        console.error(res.status + " " + res.statusText);
+      }
+    })
+    .then((json) => json as TrainDetails);
 };
-const getAllDetails = (apiCreds: ApiCredentials, trains: Train[]) => {
+const getAllDetails = (apiCreds: ApiCredentials, trains: Train[], date: Date) => {
   return new Promise<Train[]>((resolve, reject) => {
     const trainResults: Array<Train> = trains;
     for (const train of trainResults) {
@@ -39,15 +41,19 @@ const getAllDetails = (apiCreds: ApiCredentials, trains: Train[]) => {
     }, 2000);
   });
 };
-const getDepartures = (apiCreds: ApiCredentials, url: string) => {
-  fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "DB-Client-Id": apiCreds.id,
-      "DB-API-Key": apiCreds.secret,
-    } as HeadersInit,
-  })
+const getDepartures = (apiCreds: ApiCredentials, stationId: number, date: Date) => {
+  const dateStr = format(date, "yyyy-MM-dd") + "T" + format(date, "HH:mm");
+  fetch(
+    `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${stationId}?date=${dateStr}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "DB-Client-Id": apiCreds.id,
+        "DB-API-Key": apiCreds.secret,
+      } as HeadersInit,
+    }
+  )
     .then((res) => {
       if (res.ok) {
         return res.json();
@@ -56,7 +62,7 @@ const getDepartures = (apiCreds: ApiCredentials, url: string) => {
       }
     })
     .then((d) => {
-      getAllDetails(apiCreds, d).then((trainResults: Train[]) => {
+      getAllDetails(apiCreds, d, date).then((trainResults: Train[]) => {
         trains.value = trainResults;
       });
     });
@@ -64,18 +70,18 @@ const getDepartures = (apiCreds: ApiCredentials, url: string) => {
 
 export default defineComponent({
   props: {
-    departuresURL: { type: String, required: true },
+    stationId: Number,
+    date: Date,
   },
   data() {
     return {
       trains,
-      getDepartures,
       format,
     };
   },
   mounted() {
     const apiCreds = this.getApiCreds() as ApiCredentials;
-    getDepartures(apiCreds, this.departuresURL);
+    getDepartures(apiCreds, this.stationId, this.date);
   },
   methods: {
     getFromStationName(train: Train) {

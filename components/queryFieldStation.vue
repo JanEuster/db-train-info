@@ -166,7 +166,7 @@ export default defineComponent({
     font-size: 10px;
     left: 5px;
     bottom: 4px;
-    z-index: 9999;
+    z-index: 99999;
   }
 
   ul {
@@ -175,7 +175,7 @@ export default defineComponent({
     top: calc(100% + 5px);
     width: 100%;
     background: white;
-    z-index: 999;
+    z-index: 99999;
     border: 2px solid black;
 
     &::before {
@@ -186,7 +186,7 @@ export default defineComponent({
       left: 0;
       width: 100%;
       height: 10px;
-      z-index: 9999;
+      z-index: 199999;
     }
 
     li {
