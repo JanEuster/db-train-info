@@ -10,21 +10,26 @@ import JourneyDetails from "~/components/journeyDetails/journeyDetails.vue";
 import { Station, TrainWithDetails } from "~/components/types";
 import DepartureList from "~/components/departureList.vue";
 
-const stationResult = ref<Station>();
-const trainResult = ref<TrainWithDetails>();
-const trainURL = ref<string>("");
-const trainFieldActive = ref<boolean>(false);
-
 export default Vue.extend({
   name: "IndexPage",
   components: { QueryFieldStation, QueryFieldTrain, JourneyDetails, DepartureList },
-  data() {
+  setup() {
+    const stationResult = ref<Station>();
+    const trainResult = ref<TrainWithDetails>();
+    const trainURL = ref<string>("");
+    const trainFieldActive = ref<boolean>(false);
+    const date = ref(new Date());
+    date.value.setUTCFullYear(2020);
     return {
       stationResult,
-      trainURL,
       trainResult,
+      trainURL,
       trainFieldActive,
+      date,
     };
+  },
+  data() {
+    return {};
   },
   head() {
     return {
@@ -40,26 +45,29 @@ export default Vue.extend({
   },
   methods: {
     setStation(e: Station) {
-      stationResult.value = e;
-      trainResult.value = undefined;
+      this.stationResult = e;
+      this.trainResult = undefined;
 
       this.generateTrainURL();
     },
     setTrain(e: TrainWithDetails | undefined) {
-      trainResult.value = e;
+      this.trainResult = e;
     },
     generateTrainURL() {
-      if (stationResult.value) {
+      if (this.stationResult) {
         const date = format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm");
-        trainFieldActive.value = true;
-        return `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${stationResult.value.id}?date=${date}`;
+        this.trainFieldActive = true;
+        return `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${this.stationResult.id}?date=${date}`;
       } else {
-        trainFieldActive.value = false;
+        this.trainFieldActive = false;
         return "";
       }
     },
     isTrainActive() {
-      return trainFieldActive.value;
+      return this.trainFieldActive;
+    },
+    setDate(e: Date) {
+      this.date = e;
     },
   },
 });
@@ -71,7 +79,7 @@ export default Vue.extend({
     <div class="query-wrapper">
       <div class="query-row">
         <QueryFieldStation @station-result="setStation($event)" />
-        <DateTimeField />
+        <DateTimeField @date-change="setDate($event)" />
         <QueryFieldTrain
           :isActive="isTrainActive()"
           :fetchURL="generateTrainURL()"

@@ -19,6 +19,7 @@ const MONTHS = [
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default defineComponent({
+  emits: ["date-change"],
   setup() {
     const date = ref(new Date());
 
@@ -80,6 +81,7 @@ export default defineComponent({
     },
     close() {
       console.log("close");
+      this.$emit("date-change", this.date);
     },
     daysInMonth() {
       // last day of prior month + 1 month
