@@ -1,7 +1,6 @@
 <script lang="ts">
 import { ref, defineComponent } from "vue";
 import { format } from "date-fns";
-import { daysInMonth, weekdayOfFirst, weekdayOfLast } from "./functions";
 
 const MONTHS = [
   "January",
@@ -41,11 +40,21 @@ export default defineComponent({
     time() {
       return format(this.date, "HH:mm");
     },
-    weekdayFirst() {
-      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth(), 1).getDay();
+    daysAfter() {
+      const weekdayFirst = new Date(
+        this.date.getUTCFullYear(),
+        this.date.getUTCMonth(),
+        1
+      ).getDay();
+      return (7 + weekdayFirst) % 7;
     },
-    weekdayLast() {
-      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDay();
+    daysBefore() {
+      const weekdayLast = new Date(
+        this.date.getUTCFullYear(),
+        this.date.getUTCMonth() + 1,
+        0
+      ).getDay();
+      return (6 - weekdayLast) % 7;
     },
   },
   mounted() {
@@ -65,7 +74,7 @@ export default defineComponent({
   methods: {
     open() {
       console.log("open");
-      this.selectDay(this.date.getDate());
+      this.selectDay(this.date.getDate() - 1);
       this.$refs.month.selectedIndex = this.date.getMonth();
       this.$refs.year.value = this.date.getUTCFullYear();
     },
@@ -77,11 +86,11 @@ export default defineComponent({
       return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDate();
     },
     selectDay(day: number) {
-      const previous = document.getElementsByName(
-        "calender-day-" + String(this.date.getDate() + 1)
-      )[0];
-      previous.dataset.selected = "false";
-      (this.date as Date).setDate(day);
+      const all = document.getElementsByClassName("calender-day");
+      for (let i = 0; i < all.length; i++) {
+        const day = all.item(i);
+        (day as HTMLDataElement).dataset.selected = "false";
+      }
       const current = document.getElementsByName("calender-day-" + String(day + 1))[0];
       current.dataset.selected = "true";
     },
@@ -114,9 +123,6 @@ export default defineComponent({
       const newDate = new Date(this.date);
       newDate.setHours(Number(hours), Number(minutes));
       this.date = new Date(newDate);
-    },
-    calenderDateName(day: number) {
-      return "calender-day-" + day;
     },
   },
 });
@@ -154,11 +160,13 @@ export default defineComponent({
         <option value="December">December</option>
       </select>
       <div ref="calender_dates" class="calender-dates">
-        <div v-for="i in weekdayFirst - 1" class="other-month"><div></div></div>
-        <div v-for="i in daysInMonth()">
-          <div :name="calenderDateName(i + 1)" @click="selectDay(i)">{{ i }}</div>
+        <div v-for="i in daysBefore" :key="'before-' + i" class="other-month"><div></div></div>
+        <div v-for="i in daysInMonth()" :key="i">
+          <div class="calender-day" :name="'calender-day-' + i" @click="selectDay(i - 1)">
+            {{ i }}
+          </div>
         </div>
-        <div v-for="i in 7 - weekdayLast" class="other-month"><div></div></div>
+        <div v-for="i in daysAfter" :key="'after-' + i" class="other-month"><div></div></div>
       </div>
       <div class="bottom-row">
         <input type="time" name="time" :value="time" @change="setTime($event)" />
