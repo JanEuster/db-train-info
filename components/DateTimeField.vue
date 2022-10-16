@@ -29,7 +29,7 @@ export default defineComponent({
   },
   data() {
     return {
-      isOpen: true,
+      isOpen: false,
       days: 30,
       yearMax: new Date().getUTCFullYear(),
     };

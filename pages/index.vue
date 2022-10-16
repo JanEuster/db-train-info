@@ -17,14 +17,12 @@ export default Vue.extend({
     const stationResult = ref<Station>();
     const trainResult = ref<TrainWithDetails>();
     const trainURL = ref<string>("");
-    const trainFieldActive = ref<boolean>(false);
     const date = ref(new Date());
     date.value.setUTCFullYear(2020);
     return {
       stationResult,
       trainResult,
       trainURL,
-      trainFieldActive,
       date,
     };
   },
@@ -47,27 +45,20 @@ export default Vue.extend({
     setStation(e: Station) {
       this.stationResult = e;
       this.trainResult = undefined;
-
-      this.generateTrainURL();
     },
     setTrain(e: TrainWithDetails | undefined) {
       this.trainResult = e;
     },
-    generateTrainURL() {
-      if (this.stationResult) {
-        const date = format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm");
-        this.trainFieldActive = true;
-        return `https://apis.deutschebahn.com/db-api-marketplace/apis/fahrplan/v1/departureBoard/${this.stationResult.id}?date=${date}`;
-      } else {
-        this.trainFieldActive = false;
-        return "";
-      }
-    },
     isTrainActive() {
-      return this.trainFieldActive;
+      return this.stationResult ? true : false;
     },
     setDate(e: Date) {
       this.date = e;
+      const stationResult = this.stationResult;
+      this.stationResult = undefined;
+      setTimeout(() => {
+        this.stationResult = stationResult;
+      }, 50);
     },
   },
 });
@@ -82,7 +73,8 @@ export default Vue.extend({
         <DateTimeField @date-change="setDate($event)" />
         <QueryFieldTrain
           :isActive="isTrainActive()"
-          :fetchURL="generateTrainURL()"
+          :stationId="stationResult ? stationResult.id : 0"
+          :date="date"
           @train-result="setTrain($event)"
           :selected="trainResult"
         />
@@ -90,7 +82,8 @@ export default Vue.extend({
       <div class="query-row" v-if="stationResult">
         <DepartureList
           v-if="stationResult"
-          :departuresURL="generateTrainURL()"
+          :stationId="stationResult.id"
+          :date="date"
           @train-result="setTrain($event)"
         />
       </div>
