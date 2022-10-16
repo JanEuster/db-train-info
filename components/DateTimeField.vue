@@ -22,11 +22,9 @@ const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 export default defineComponent({
   setup() {
     const date = ref(new Date());
-    const selectedMonth = date.value.getUTCMonth();
 
     return {
       date,
-      selectedMonth,
     };
   },
   data() {
@@ -43,10 +41,6 @@ export default defineComponent({
     time() {
       return format(this.date, "HH:mm");
     },
-    daysInMonth() {
-      // last day of prior month + 1 month
-      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDate();
-    },
     weekdayFirst() {
       return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth(), 1).getDay();
     },
@@ -55,12 +49,32 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.$refs.month.selectedIndex = this.selectedMonth;
-    this.selectDay(this.date.getDate());
+    if (this.isOpen) {
+      this.open();
+    } else {
+      this.close();
+    }
+  },
+  updated() {
+    if (this.isOpen) {
+      this.open();
+    } else {
+      this.close();
+    }
   },
   methods: {
-    day() {
-      return this.date.getDate();
+    open() {
+      console.log("open");
+      this.selectDay(this.date.getDate());
+      this.$refs.month.selectedIndex = this.date.getMonth();
+      this.$refs.year.value = this.date.getUTCFullYear();
+    },
+    close() {
+      console.log("close");
+    },
+    daysInMonth() {
+      // last day of prior month + 1 month
+      return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDate();
     },
     selectDay(day: number) {
       const previous = document.getElementsByName(
@@ -73,19 +87,33 @@ export default defineComponent({
     },
     setYear(e: any) {
       const year = e.target.value;
-      (this.date as Date).setFullYear(year);
+      const newDate = new Date(this.date);
+      newDate.setFullYear(year);
+      this.date = new Date(newDate);
+
+      if (this.date.getDay() >= this.daysInMonth()) {
+        (this.date as Date).setDate(1);
+      }
     },
     setMonth(e: any) {
       const month = MONTHS.findIndex((value) => {
         if (value === e.target.value) return true;
         return false;
       });
-      (this.date as Date).setMonth(month);
+      const newDate = new Date(this.date);
+      newDate.setMonth(month);
+      this.date = new Date(newDate);
+
+      if (this.date.getDay() >= this.daysInMonth()) {
+        (this.date as Date).setDate(1);
+      }
     },
     setTime(e: any) {
       const time = e.target.value as string;
       const [hours, minutes] = time.split(":", 2);
-      (this.date as Date).setHours(Number(hours), Number(minutes));
+      const newDate = new Date(this.date);
+      newDate.setHours(Number(hours), Number(minutes));
+      this.date = new Date(newDate);
     },
     calenderDateName(day: number) {
       return "calender-day-" + day;
@@ -103,6 +131,7 @@ export default defineComponent({
     </div>
     <div v-if="isOpen" class="date-time-picker">
       <input
+        ref="year"
         type="number"
         min="2000"
         :max="yearMax"
@@ -125,11 +154,11 @@ export default defineComponent({
         <option value="December">December</option>
       </select>
       <div ref="calender_dates" class="calender-dates">
-        <div v-for="i in weekdayFirst" class="other-month"><div></div></div>
-        <div v-for="i in daysInMonth">
+        <div v-for="i in weekdayFirst - 1" class="other-month"><div></div></div>
+        <div v-for="i in daysInMonth()">
           <div :name="calenderDateName(i + 1)" @click="selectDay(i)">{{ i }}</div>
         </div>
-        <div v-for="i in 6 - weekdayLast" class="other-month"><div></div></div>
+        <div v-for="i in 7 - weekdayLast" class="other-month"><div></div></div>
       </div>
       <div class="bottom-row">
         <input type="time" name="time" :value="time" @change="setTime($event)" />
