@@ -1,5 +1,6 @@
 <script lang="ts" type="module">
 import { defineComponent } from "vue";
+import {format} from "date-fns"
 import { TrainWithDetails } from "../types";
 import { HTMLEntityStringToUTF8 as toUTF8 } from "../functions";
 import journeyStation from "./journeyStation.vue";
@@ -16,6 +17,9 @@ export default defineComponent({
     };
   },
   methods: {
+    longDate(dateTime: string) {
+      return format(new Date(dateTime), "PPPP")
+    },
     setTrain(train: TrainWithDetails) {
       if (train === undefined) {
         return false;
@@ -41,15 +45,28 @@ export default defineComponent({
     <header @train-result="setTrain($event)">
       <h1>{{ toUTF8(trainResult.name) }}</h1>
       <h2>
-        {{ toUTF8(trainResult.details[0].stopName) }} <span class="tight">-----</span>
+        {{ toUTF8(trainResult.details[0].stopName) }} <span class="tight">-------</span>
         {{ toUTF8(trainResult.details[trainResult.details.length - 1].stopName) }}
       </h2>
+      <h3>
+        {{ longDate(trainResult.dateTime) }}
+        <br />
+        <b
+          >{{ trainResult.details[0].depTime }}
+          <span class="tight">---------</span>
+          {{ trainResult.details[trainResult.details.length - 1].arrTime }}</b
+        >
+      </h3>
     </header>
     <journeyMap :stations="trainResult.details" class="map" />
     <div class="journey-stations-outer">
       <div class="journey-stations">
         <ul>
-          <journeyStation v-for="(station, i) in trainResult.details" :key="i" :stationDetails="station" />
+          <journeyStation
+            v-for="(station, i) in trainResult.details"
+            :key="i"
+            :stationDetails="station"
+          />
         </ul>
       </div>
     </div>
@@ -78,6 +95,11 @@ export default defineComponent({
     font-weight: 600;
     font-style: italic;
   }
+  h3 {
+    margin-top: 5px;
+    font-size: 15px;
+    line-height: 1.1;
+  }
 }
 
 .map {
@@ -104,7 +126,6 @@ export default defineComponent({
   &::-webkit-scrollbar {
     display: none;
   }
-
 
   & ul {
     position: relative;
