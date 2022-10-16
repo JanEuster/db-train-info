@@ -85,37 +85,43 @@ export default defineComponent({
       // last day of prior month + 1 month
       return new Date(this.date.getUTCFullYear(), this.date.getUTCMonth() + 1, 0).getDate();
     },
+    daysInGivenMonth(year: number, month: number) {
+      return new Date(year, month + 1, 0).getDate();
+    },
     selectDay(day: number) {
       const all = document.getElementsByClassName("calender-day");
       for (let i = 0; i < all.length; i++) {
         const day = all.item(i);
         (day as HTMLDataElement).dataset.selected = "false";
       }
+      (this.date as Date).setDate(day + 1);
       const current = document.getElementsByName("calender-day-" + String(day + 1))[0];
       current.dataset.selected = "true";
     },
     setYear(e: any) {
       const year = e.target.value;
+
       const newDate = new Date(this.date);
+      if (this.date.getDate() > this.daysInGivenMonth(year, this.date.getUTCMonth())) {
+        // stop day of month being too high (31 in new month of 30 days or Febuary stuff)
+        newDate.setUTCDate(1);
+      }
       newDate.setFullYear(year);
       this.date = new Date(newDate);
-
-      if (this.date.getDay() >= this.daysInMonth()) {
-        (this.date as Date).setDate(1);
-      }
     },
     setMonth(e: any) {
       const month = MONTHS.findIndex((value) => {
         if (value === e.target.value) return true;
         return false;
       });
+
       const newDate = new Date(this.date);
+      if (this.date.getDate() > this.daysInGivenMonth(this.date.getUTCFullYear(), month)) {
+        // stop day of month being too high (31 in new month of 30 days or Febuary stuff)
+        newDate.setUTCDate(1);
+      }
       newDate.setMonth(month);
       this.date = new Date(newDate);
-
-      if (this.date.getDay() >= this.daysInMonth()) {
-        (this.date as Date).setDate(1);
-      }
     },
     setTime(e: any) {
       const time = e.target.value as string;
