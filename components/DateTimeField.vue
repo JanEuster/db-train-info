@@ -3,23 +3,24 @@ import { ref, defineComponent } from "vue";
 import { format } from "date-fns";
 import { daysInMonth, weekdayOfFirst, weekdayOfLast } from "./functions";
 
+const MONTHS = [
+  "January",
+  "Febuary",
+  "March",
+  "April",
+  "May",
+  "June",
+  "Juli",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
 export default defineComponent({
   setup() {
-    const months = [
-      "January",
-      "Febuary",
-      "March",
-      "April",
-      "May",
-      "June",
-      "Juli",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const date = ref(new Date());
     const selectedMonth = date.value.getUTCMonth();
 
@@ -66,9 +67,25 @@ export default defineComponent({
         "calender-day-" + String(this.date.getDate() + 1)
       )[0];
       previous.dataset.selected = "false";
-      this.date.setDate(day);
+      (this.date as Date).setDate(day);
       const current = document.getElementsByName("calender-day-" + String(day + 1))[0];
       current.dataset.selected = "true";
+    },
+    setYear(e: any) {
+      const year = e.target.value;
+      (this.date as Date).setFullYear(year);
+    },
+    setMonth(e: any) {
+      const month = MONTHS.findIndex((value) => {
+        if (value === e.target.value) return true;
+        return false;
+      });
+      (this.date as Date).setMonth(month);
+    },
+    setTime(e: any) {
+      const time = e.target.value as string;
+      const [hours, minutes] = time.split(":", 2);
+      (this.date as Date).setHours(Number(hours), Number(minutes));
     },
     calenderDateName(day: number) {
       return "calender-day-" + day;
@@ -85,8 +102,15 @@ export default defineComponent({
       <p>{{ time }}</p>
     </div>
     <div v-if="isOpen" class="date-time-picker">
-      <input type="number" min="2000" :max="yearMax" name="year" :value="yearMax" />
-      <select ref="month" name="month" class="calender-month">
+      <input
+        type="number"
+        min="2000"
+        :max="yearMax"
+        name="year"
+        :value="yearMax"
+        @change="setYear($event)"
+      />
+      <select ref="month" name="month" class="calender-month" @change="setMonth($event)">
         <option value="January">January</option>
         <option value="Febuary">Febuary</option>
         <option value="March">March</option>
@@ -108,7 +132,7 @@ export default defineComponent({
         <div v-for="i in 6 - weekdayLast" class="other-month"><div></div></div>
       </div>
       <div class="bottom-row">
-        <input type="time" name="time" :value="time" />
+        <input type="time" name="time" :value="time" @change="setTime($event)" />
         <button name="ok-button" @click="isOpen = false">Ok</button>
       </div>
     </div>
