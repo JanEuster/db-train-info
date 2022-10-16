@@ -22,16 +22,16 @@ export default {
       wrapperClass,
     };
   },
-  // async mounted() {
-  //   this.loadApiData();
-  //   if (await this.validateApiData()) {
-  //     this.validCreds = true;
-  //     this.wrapperClass = "api-login-wrapper active";
-  //     const creds = this.getApiData();
-  //     (document.getElementById("api-client-id") as HTMLInputElement).value = creds.id;
-  //     (document.getElementById("api-secret-key") as HTMLInputElement).value = creds.secret;
-  //   }
-  // },
+  async mounted() {
+    this.loadApiData();
+    if (await this.validateApiData()) {
+      this.validCreds = true;
+      this.wrapperClass = "api-login-wrapper active";
+      const creds = this.getApiData();
+      (document.getElementById("api-client-id") as HTMLInputElement).value = creds.id;
+      (document.getElementById("api-secret-key") as HTMLInputElement).value = creds.secret;
+    }
+  },
   methods: {
     async submitData() {
       const id = (document.getElementById("api-client-id") as HTMLInputElement).value;
