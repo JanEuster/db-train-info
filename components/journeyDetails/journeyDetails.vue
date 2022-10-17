@@ -101,6 +101,7 @@ export default defineComponent({
 
 .journey-stations {
   padding-left: 50px;
+  min-height: 100%;
   max-height: 100%;
 
   overflow-y: scroll;
