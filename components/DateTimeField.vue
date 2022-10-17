@@ -22,16 +22,18 @@ export default defineComponent({
   emits: ["date-change"],
   setup() {
     const date = ref(new Date());
+    const year = ref(new Date().getUTCFullYear());
 
     return {
       date,
+      year,
     };
   },
   data() {
     return {
       isOpen: false,
-      days: 30,
       yearMax: new Date().getUTCFullYear(),
+      days: 30,
     };
   },
   computed: {
@@ -112,6 +114,7 @@ export default defineComponent({
       }
       newDate.setFullYear(year);
       this.date = new Date(newDate);
+      this.year = year;
     },
     setMonth(e: any) {
       const month = MONTHS.findIndex((value) => {
@@ -126,6 +129,7 @@ export default defineComponent({
       }
       newDate.setMonth(month);
       this.date = new Date(newDate);
+      this.selectDay();
     },
     setTime(e: any) {
       const time = e.target.value as string;
@@ -152,7 +156,7 @@ export default defineComponent({
         min="2000"
         :max="yearMax"
         name="year"
-        :value="yearMax"
+        :value="year"
         @change="setYear($event)"
       />
       <select ref="month" name="month" class="calender-month" @change="setMonth($event)">
