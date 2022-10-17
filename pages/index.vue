@@ -18,7 +18,6 @@ export default Vue.extend({
     const trainResult = ref<TrainWithDetails>();
     const trainURL = ref<string>("");
     const date = ref(new Date());
-    date.value.setUTCFullYear(2020);
     return {
       stationResult,
       trainResult,
