@@ -98,6 +98,7 @@ export default {
   }
   input,
   button {
+    max-width: 100%;
     outline: 3px solid black;
     background-color: white;
     color: black;
