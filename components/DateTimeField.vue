@@ -97,12 +97,12 @@ export default defineComponent({
       }
       const current = document.getElementsByName("calender-day-" + String(this.date.getDate()))[0];
       current.dataset.selected = "true";
+      this.year = this.date.getUTCFullYear();
     },
     setDay(day: number) {
       const newDate = new Date(this.date);
       newDate.setDate(day);
       this.date = new Date(newDate);
-      this.year = this.date.getUTCFullYear();
       this.selectDay();
     },
     setYear(e: any) {
@@ -115,7 +115,7 @@ export default defineComponent({
       }
       newDate.setFullYear(year);
       this.date = new Date(newDate);
-      this.year = year;
+      this.selectDay();
     },
     setMonth(e: any) {
       const month = MONTHS.findIndex((value) => {
