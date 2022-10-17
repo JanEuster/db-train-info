@@ -178,6 +178,7 @@ div .departure-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 1px 3px;
+  padding-bottom: 40px;
 }
 
 .departure-table th {
