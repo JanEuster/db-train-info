@@ -84,6 +84,9 @@ export default defineComponent({
     getDepartures(apiCreds, this.stationId, this.date);
   },
   methods: {
+    longDate(dateTime: string) {
+      return format(new Date(dateTime), "PPPP");
+    },
     getFromStationName(train: Train) {
       return train.details ? toUTF8(train.details[0].stopName) : "";
     },
@@ -108,6 +111,8 @@ export default defineComponent({
 <template>
   <div class="query-field" @station-result="getDepartures(departuresURL)">
     <div class="departures-wrapper">
+      <h2>Departure Board</h2>
+      {{ longDate(date) }}
       <div>
         <table class="departure-table">
           <tr>

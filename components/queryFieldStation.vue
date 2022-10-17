@@ -109,7 +109,7 @@ export default defineComponent({
 
 <template>
   <div class="query-field">
-    <label>Station:</label>
+    <h2>Station:</h2>
     <div class="query-field-input">
       <input
         ref="inputRef"

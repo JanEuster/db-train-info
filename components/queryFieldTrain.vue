@@ -158,7 +158,7 @@ export default defineComponent({
 
 <template>
   <div class="query-field">
-    <label>Train:</label>
+    <h2>Train:</h2>
     <div class="query-field-input-big">
       <input
         ref="inputRef"

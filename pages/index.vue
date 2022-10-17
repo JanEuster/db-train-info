@@ -103,7 +103,25 @@ export default Vue.extend({
   box-sizing: border-box;
 }
 
+h1 {
+  font-size: 22px;
+  line-height: 22px;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 18px;
+  line-height: 18px;
+  font-weight: 600;
+  font-style: italic;
+}
+h3 {
+  margin-top: 5px;
+  font-size: 15px;
+  line-height: 1.1;
+}
 .tight {
+  margin-left: -0.3%;
   letter-spacing: -4px;
 }
 

@@ -82,24 +82,6 @@ export default defineComponent({
   padding: 4px 8px;
   min-height: 100%;
   max-height: 100%;
-
-  h1 {
-    font-size: 22px;
-    line-height: 22px;
-    font-weight: 800;
-  }
-
-  h2 {
-    font-size: 18px;
-    line-height: 18px;
-    font-weight: 600;
-    font-style: italic;
-  }
-  h3 {
-    margin-top: 5px;
-    font-size: 15px;
-    line-height: 1.1;
-  }
 }
 
 .map {
