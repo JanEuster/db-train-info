@@ -102,6 +102,7 @@ export default defineComponent({
       const newDate = new Date(this.date);
       newDate.setDate(day);
       this.date = new Date(newDate);
+      this.year = this.date.getUTCFullYear();
       this.selectDay();
     },
     setYear(e: any) {
