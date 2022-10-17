@@ -58,30 +58,27 @@ export default defineComponent({
       return (6 - weekdayLast) % 7;
     },
   },
-  mounted() {
-    if (this.isOpen) {
-      this.open();
-    } else {
-      this.close();
-    }
-  },
-  updated() {
-    if (this.isOpen) {
-      this.open();
-    } else {
-      this.close();
-    }
-  },
   methods: {
     open() {
       console.log("open");
-      this.selectDay(this.date.getDate() - 1);
-      this.$refs.month.selectedIndex = this.date.getMonth();
-      this.$refs.year.value = this.date.getUTCFullYear();
+      this.isOpen = true;
+      setTimeout(() => {
+        this.selectDay();
+        this.$refs.month.selectedIndex = this.date.getMonth();
+        this.$refs.year.value = this.date.getUTCFullYear();
+      }, 50);
     },
     close() {
       console.log("close");
+      this.isOpen = false;
       this.$emit("date-change", this.date);
+    },
+    openOrClose() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
     },
     daysInMonth() {
       // last day of prior month + 1 month
@@ -90,15 +87,20 @@ export default defineComponent({
     daysInGivenMonth(year: number, month: number) {
       return new Date(year, month + 1, 0).getDate();
     },
-    selectDay(day: number) {
+    selectDay() {
       const all = document.getElementsByClassName("calender-day");
       for (let i = 0; i < all.length; i++) {
         const day = all.item(i);
         (day as HTMLDataElement).dataset.selected = "false";
       }
-      (this.date as Date).setDate(day + 1);
-      const current = document.getElementsByName("calender-day-" + String(day + 1))[0];
+      const current = document.getElementsByName("calender-day-" + String(this.date.getDate()))[0];
       current.dataset.selected = "true";
+    },
+    setDay(day: number) {
+      const newDate = new Date(this.date);
+      newDate.setDate(day);
+      this.date = new Date(newDate);
+      this.selectDay();
     },
     setYear(e: any) {
       const year = e.target.value;
@@ -138,7 +140,7 @@ export default defineComponent({
 
 <template>
   <div class="query-field">
-    <div class="date-time-display" @click="isOpen = !isOpen">
+    <div class="date-time-display" @click="openOrClose()">
       <p>{{ dateDisplay }}</p>
       <hr />
       <p>{{ time }}</p>
@@ -170,7 +172,7 @@ export default defineComponent({
       <div ref="calender_dates" class="calender-dates">
         <div v-for="i in daysBefore" :key="'before-' + i" class="other-month"><div></div></div>
         <div v-for="i in daysInMonth()" :key="i">
-          <div class="calender-day" :name="'calender-day-' + i" @click="selectDay(i - 1)">
+          <div class="calender-day" :name="'calender-day-' + i" @click="setDay(i)">
             {{ i }}
           </div>
         </div>
@@ -178,7 +180,7 @@ export default defineComponent({
       </div>
       <div class="bottom-row">
         <input type="time" name="time" :value="time" @change="setTime($event)" />
-        <button name="ok-button" @click="isOpen = false">Ok</button>
+        <button name="ok-button" @click="close()">Ok</button>
       </div>
     </div>
   </div>
