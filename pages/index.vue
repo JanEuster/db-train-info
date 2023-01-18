@@ -64,6 +64,7 @@ export default Vue.extend({
 </script>
 
 <template>
+<div>
 <h1>The DB Fahrplan API was removed from their catalog for no apparent reason??? Thank you DB, always a pleasure</h1>
   <div class="app">
     <ApiLogin />
@@ -89,6 +90,7 @@ export default Vue.extend({
       </div>
     </div>
     <JourneyDetails v-if="trainResult" :trainResult="trainResult" />
+  </div>
   </div>
 </template>
 
