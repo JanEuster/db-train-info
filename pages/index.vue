@@ -64,6 +64,7 @@ export default Vue.extend({
 </script>
 
 <template>
+<h1>The DB Fahrplan API was removed from their catalog for no apparent reason??? Thank you DB, always a pleasure</h1>
   <div class="app">
     <ApiLogin />
     <div class="query-wrapper">
